@@ -22,6 +22,12 @@ import ClientDashboard from "../pages/client/ClientDashboard";
 import MechanicDashboard from "../pages/mechanic/MechanicDashboard";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 
+import Vehicles from "../pages/client/Vehicles";
+
+import InspectionRequests from "../pages/client/InspectionRequests";
+
+import CreateInspectionRequest from "../pages/client/CreateInspectionRequest";
+
 export const router = createBrowserRouter([
   /*
   |--------------------------------------------------------------------------
@@ -92,6 +98,25 @@ export const router = createBrowserRouter([
             index: true,
             element: <ClientDashboard />,
           },
+
+          {
+          path: "vehicles",
+          element: <Vehicles />,
+        },
+
+        {
+          path: "inspection-requests",
+          element: (
+            <InspectionRequests />
+          ),
+        },
+
+        {
+          path: "inspection-requests/create",
+          element: (
+            <CreateInspectionRequest />
+          ),
+        },
         ],
       },
     ],

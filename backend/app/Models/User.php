@@ -62,4 +62,25 @@ class User extends Authenticatable
     {
         return $this->role === 'admin';
     }
+
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+
+    public function inspectionRequests()
+    {
+        return $this->hasMany(
+            InspectionRequest::class,
+            'client_id'
+        );
+    }
+
+    public function mechanicInspectionRequests()
+    {
+        return $this->hasMany(
+            InspectionRequest::class,
+            'mechanic_id'
+        );
+    }
 }
