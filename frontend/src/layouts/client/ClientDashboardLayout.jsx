@@ -13,6 +13,8 @@ import {
   useNavigate,
 } from "react-router-dom";
 
+
+
 import { useUserContext } from "../../context/UserContext";
 
 export default function ClientDashboardLayout() {
@@ -56,29 +58,56 @@ export default function ClientDashboardLayout() {
             Dashboard
           </NavLink>
 
-          <NavLink
-            to="/dashboard/inspections"
-            className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50"
-          >
-            <ClipboardCheck size={18} />
-            My Inspections
-          </NavLink>
+           <NavLink
+    to="/dashboard"
+    end
+    className={({ isActive }) =>
+      `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium ${
+        isActive
+          ? "bg-blue-600 text-white"
+          : "text-slate-600 hover:bg-slate-100"
+      }`
+    }
+  >
+    <LayoutDashboard size={19} />
 
-          <NavLink
-            to="/dashboard/vehicles"
-            className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50"
-          >
-            <Car size={18} />
-            My Vehicles
-          </NavLink>
+    Dashboard
+  </NavLink>
 
-          <NavLink
-            to="/dashboard/profile"
-            className="flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-50"
-          >
-            <User size={18} />
-            Profile
-          </NavLink>
+  <NavLink
+    to="/dashboard/vehicles"
+    className={({ isActive }) =>
+      `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium ${
+        isActive
+          ? "bg-blue-600 text-white"
+          : "text-slate-600 hover:bg-slate-100"
+      }`
+    }
+  >
+    <Car size={19} />
+
+    My Vehicles
+  </NavLink>
+
+  <NavLink
+    to="/dashboard/inspection-requests"
+    className={({ isActive }) =>
+      `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium ${
+        isActive
+          ? "bg-blue-600 text-white"
+          : "text-slate-600 hover:bg-slate-100"
+      }`
+    }
+  >
+    <ClipboardCheck size={19} />
+
+    Inspections
+  </NavLink>
+
+ 
+         
+
+           
         </nav>
       </aside>
 
