@@ -83,4 +83,24 @@ class User extends Authenticatable
             'mechanic_id'
         );
     }
+
+    public function mechanicProfile()
+    {
+        return $this->hasOne(MechanicProfile::class);
+    }
+
+    public function clientAppointments()
+    {
+        return $this->hasMany(Appointment::class, 'client_id');
+    }
+
+    public function mechanicAppointments()
+    {
+        return $this->hasMany(Appointment::class, 'mechanic_id');
+    }
+
+    public function mechanicAvailabilities()
+    {
+        return $this->hasMany(MechanicAvailability::class, 'mechanic_id');
+    }
 }

@@ -4,23 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class InspectionRequest extends Model
+class Appointment extends Model
 {
     protected $fillable = [
+        'inspection_request_id',
         'client_id',
-        'vehicle_id',
         'mechanic_id',
-        'package',
+        'appointment_date',
+        'start_time',
+        'end_time',
         'status',
-        'location',
-        'description',
-        'preferred_date',
-        'preferred_time',
+        'notes',
     ];
 
     protected $casts = [
-        'preferred_date' => 'date',
+        'appointment_date' => 'date',
     ];
+
+    public function inspectionRequest()
+    {
+        return $this->belongsTo(InspectionRequest::class);
+    }
 
     public function client()
     {
@@ -30,15 +34,5 @@ class InspectionRequest extends Model
     public function mechanic()
     {
         return $this->belongsTo(User::class, 'mechanic_id');
-    }
-
-    public function vehicle()
-    {
-        return $this->belongsTo(Vehicle::class);
-    }
-
-    public function appointment()
-    {
-        return $this->hasOne(Appointment::class);
     }
 }
