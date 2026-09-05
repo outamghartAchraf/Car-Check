@@ -41,4 +41,9 @@ class InspectionRequest extends Model
     {
         return $this->hasOne(Appointment::class);
     }
+
+    public function inspectionReport()
+{
+    return $this->hasOne(InspectionReport::class);
+}
 }

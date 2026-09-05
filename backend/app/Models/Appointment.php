@@ -35,4 +35,9 @@ class Appointment extends Model
     {
         return $this->belongsTo(User::class, 'mechanic_id');
     }
+
+    public function inspectionReport()
+{
+    return $this->hasOne(InspectionReport::class);
+}
 }
