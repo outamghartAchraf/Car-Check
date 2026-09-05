@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\InspectionRequestController;
 use App\Http\Controllers\Api\MechanicProfileController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\MechanicAvailabilityController;
+use App\Http\Controllers\Api\InspectionReportController;
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -105,5 +106,32 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get(
         '/mechanic/appointments',
         [AppointmentController::class, 'mechanicIndex']
+    );
+
+    // Inspection Reports
+
+    Route::post(
+        '/mechanic/appointments/{appointment}/complete',
+        [InspectionReportController::class, 'store']
+    );
+
+    Route::get(
+        '/inspection-reports',
+        [InspectionReportController::class, 'clientIndex']
+    );
+
+    Route::get(
+        '/mechanic/inspection-reports',
+        [InspectionReportController::class, 'mechanicIndex']
+    );
+
+    Route::get(
+        '/inspection-reports/{inspectionReport}',
+        [InspectionReportController::class, 'show']
+    );
+
+    Route::get(
+        '/inspection-reports/{inspectionReport}/pdf',
+        [InspectionReportController::class, 'downloadPdf']
     );
 });
