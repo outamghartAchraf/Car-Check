@@ -236,6 +236,144 @@ class InspectionRequestController extends Controller
         ]);
     }
 
+  
+
+    public function mechanicIndex(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->role !== 'mechanic') {
+            return response()->json([
+                'message' =>
+                    'Only mechanics can access inspection requests.',
+            ], 403);
+        }
+
+        $requests = InspectionRequest::with([
+            'vehicle',
+            'client:id,name,email',
+        ])
+            ->where('status', 'pending')
+            ->whereNull('mechanic_id')
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'inspection_requests' => $requests,
+        ]);
+    }
+
+    public function mechanicShow(
+        Request $request,
+        InspectionRequest $inspectionRequest
+    ) {
+        $user = $request->user();
+
+        if ($user->role !== 'mechanic') {
+            return response()->json([
+                'message' =>
+                    'Only mechanics can access this request.',
+            ], 403);
+        }
+
+        $inspectionRequest->load([
+            'vehicle',
+            'client:id,name,email',
+        ]);
+
+        return response()->json([
+            'inspection_request' =>
+                $inspectionRequest,
+        ]);
+    }
+
+    public function accept(
+        Request $request,
+        InspectionRequest $inspectionRequest
+    ) {
+        $user = $request->user();
+
+        if ($user->role !== 'mechanic') {
+            return response()->json([
+                'message' =>
+                    'Only mechanics can accept requests.',
+            ], 403);
+        }
+
+        if (
+            $inspectionRequest->status !== 'pending' ||
+            $inspectionRequest->mechanic_id !== null
+        ) {
+            return response()->json([
+                'message' =>
+                    'This inspection request is no longer available.',
+            ], 422);
+        }
+
+        $inspectionRequest->update([
+            'mechanic_id' => $user->id,
+            'status' => 'accepted',
+        ]);
+
+        $inspectionRequest->load([
+            'vehicle',
+            'client:id,name,email',
+            'mechanic:id,name,email',
+        ]);
+
+        return response()->json([
+            'message' =>
+                'Inspection request accepted successfully.',
+
+            'inspection_request' =>
+                $inspectionRequest,
+        ]);
+    }
+
+    public function reject(
+        Request $request,
+        InspectionRequest $inspectionRequest
+    ) {
+        $user = $request->user();
+
+        if ($user->role !== 'mechanic') {
+            return response()->json([
+                'message' =>
+                    'Only mechanics can reject requests.',
+            ], 403);
+        }
+
+        if (
+            $inspectionRequest->status !== 'pending' ||
+            $inspectionRequest->mechanic_id !== null
+        ) {
+            return response()->json([
+                'message' =>
+                    'This inspection request is no longer available.',
+            ], 422);
+        }
+
+        $inspectionRequest->update([
+            'mechanic_id' => $user->id,
+            'status' => 'rejected',
+        ]);
+
+        $inspectionRequest->load([
+            'vehicle',
+            'client:id,name,email',
+            'mechanic:id,name,email',
+        ]);
+
+        return response()->json([
+            'message' =>
+                'Inspection request rejected successfully.',
+
+            'inspection_request' =>
+                $inspectionRequest,
+        ]);
+    }
+
+
     private function ensureOwner(
         Request $request,
         InspectionRequest $inspectionRequest
