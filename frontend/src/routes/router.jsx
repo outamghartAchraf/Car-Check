@@ -27,6 +27,21 @@ import Vehicles from "../pages/client/Vehicles";
 import InspectionRequests from "../pages/client/InspectionRequests";
 
 import CreateInspectionRequest from "../pages/client/CreateInspectionRequest";
+import MechanicProfile from "../pages/mechanic/MechanicProfile";
+
+import MechanicInspectionRequests from "../pages/mechanic/InspectionRequests";
+
+import Appointments from "../pages/client/Appointments";
+
+import Availability from "../pages/mechanic/Availability";
+
+import MechanicAppointments from "../pages/mechanic/Appointments";
+
+import CompleteInspection from "../pages/mechanic/CompleteInspection";
+
+import InspectionReports from "../pages/client/InspectionReports";
+
+import Reviews from "../pages/mechanic/Reviews";
 
 export const router = createBrowserRouter([
   /*
@@ -84,9 +99,7 @@ export const router = createBrowserRouter([
   */
 
   {
-    element: (
-      <ProtectedRoute allowedRoles={["client"]} />
-    ),
+    element: <ProtectedRoute allowedRoles={["client"]} />,
 
     children: [
       {
@@ -100,23 +113,29 @@ export const router = createBrowserRouter([
           },
 
           {
-          path: "vehicles",
-          element: <Vehicles />,
-        },
+            path: "vehicles",
+            element: <Vehicles />,
+          },
 
-        {
-          path: "inspection-requests",
-          element: (
-            <InspectionRequests />
-          ),
-        },
+          {
+            path: "inspection-requests",
+            element: <InspectionRequests />,
+          },
 
-        {
-          path: "inspection-requests/create",
-          element: (
-            <CreateInspectionRequest />
-          ),
-        },
+          {
+            path: "inspection-requests/create",
+            element: <CreateInspectionRequest />,
+          },
+
+          {
+            path: "appointments",
+            element: <Appointments />,
+          },
+
+          {
+            path: "inspection-reports",
+            element: <InspectionReports />,
+          },
         ],
       },
     ],
@@ -129,9 +148,7 @@ export const router = createBrowserRouter([
   */
 
   {
-    element: (
-      <ProtectedRoute allowedRoles={["mechanic"]} />
-    ),
+    element: <ProtectedRoute allowedRoles={["mechanic"]} />,
 
     children: [
       {
@@ -142,6 +159,34 @@ export const router = createBrowserRouter([
           {
             path: "dashboard",
             element: <MechanicDashboard />,
+          },
+          {
+            path: "profile",
+            element: <MechanicProfile />,
+          },
+
+          {
+            path: "inspection-requests",
+            element: <MechanicInspectionRequests />,
+          },
+          {
+            path: "availability",
+            element: <Availability />,
+          },
+
+          {
+            path: "appointments",
+            element: <MechanicAppointments />,
+          },
+
+          {
+            path: "appointments/:appointmentId/complete",
+            element: <CompleteInspection />,
+          },
+
+          {
+            path: "reviews",
+            element: <Reviews />,
           },
         ],
       },
@@ -155,9 +200,7 @@ export const router = createBrowserRouter([
   */
 
   {
-    element: (
-      <ProtectedRoute allowedRoles={["admin"]} />
-    ),
+    element: <ProtectedRoute allowedRoles={["admin"]} />,
 
     children: [
       {
