@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\MechanicAvailabilityController;
 use App\Http\Controllers\Api\InspectionReportController;
 use App\Http\Controllers\Api\ReviewController;
+use App\Http\Controllers\Api\AdminDashboardController;
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -147,4 +148,10 @@ Route::middleware('auth:sanctum')->group(function () {
         '/mechanic/reviews',
         [ReviewController::class, 'mechanicIndex']
     );
+
+    //Admin Dashboard
+    Route::get(
+    '/admin/dashboard',
+    [AdminDashboardController::class, 'index']
+);
 });
