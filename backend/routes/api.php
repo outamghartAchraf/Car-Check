@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\InspectionReportController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\AdminDashboardController;
 use App\Http\Controllers\Api\AdminMechanicController;
+use App\Http\Controllers\Api\AdminClientController;
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -176,5 +177,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch(
         '/admin/mechanics/{mechanic}/reject',
         [AdminMechanicController::class, 'reject']
+    );
+
+    // Admin Clients
+    Route::get(
+        '/admin/clients',
+        [AdminClientController::class, 'index']
+    );
+
+    Route::get(
+        '/admin/clients/{client}',
+        [AdminClientController::class, 'show']
     );
 });
