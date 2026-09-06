@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\MechanicAvailabilityController;
 use App\Http\Controllers\Api\InspectionReportController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\AdminDashboardController;
+use App\Http\Controllers\Api\AdminMechanicController;
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -151,7 +152,29 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //Admin Dashboard
     Route::get(
-    '/admin/dashboard',
-    [AdminDashboardController::class, 'index']
-);
+        '/admin/dashboard',
+        [AdminDashboardController::class, 'index']
+    );
+
+    // Admin Mechanics
+
+    Route::get(
+        '/admin/mechanics',
+        [AdminMechanicController::class, 'index']
+    );
+
+    Route::get(
+        '/admin/mechanics/{mechanic}',
+        [AdminMechanicController::class, 'show']
+    );
+
+    Route::patch(
+        '/admin/mechanics/{mechanic}/certify',
+        [AdminMechanicController::class, 'certify']
+    );
+
+    Route::patch(
+        '/admin/mechanics/{mechanic}/reject',
+        [AdminMechanicController::class, 'reject']
+    );
 });
