@@ -287,48 +287,59 @@ class InspectionRequestController extends Controller
         ]);
     }
 
-    public function accept(
-        Request $request,
-        InspectionRequest $inspectionRequest
-    ) {
-        $user = $request->user();
+public function accept(Request $request, InspectionRequest $inspectionRequest)
+{
+    $user = $request->user();
 
-        if ($user->role !== 'mechanic') {
-            return response()->json([
-                'message' =>
-                    'Only mechanics can accept requests.',
-            ], 403);
-        }
-
-        if (
-            $inspectionRequest->status !== 'pending' ||
-            $inspectionRequest->mechanic_id !== null
-        ) {
-            return response()->json([
-                'message' =>
-                    'This inspection request is no longer available.',
-            ], 422);
-        }
-
-        $inspectionRequest->update([
-            'mechanic_id' => $user->id,
-            'status' => 'accepted',
-        ]);
-
-        $inspectionRequest->load([
-            'vehicle',
-            'client:id,name,email',
-            'mechanic:id,name,email',
-        ]);
-
+    // 1. Check user role
+    if ($user->role !== 'mechanic') {
         return response()->json([
-            'message' =>
-                'Inspection request accepted successfully.',
-
-            'inspection_request' =>
-                $inspectionRequest,
-        ]);
+            'message' => 'Only mechanics can accept inspection requests.',
+        ], 403);
     }
+
+    // 2. Check mechanic profile
+    $profile = $user->mechanicProfile;
+
+    if (!$profile) {
+        return response()->json([
+            'message' => 'Please complete your mechanic profile before accepting inspection requests.',
+        ], 422);
+    }
+
+    // 3. Check certification status
+    if ($profile->certification_status !== 'certified') {
+        return response()->json([
+            'message' => 'Your mechanic account must be certified by an administrator before accepting inspection requests.',
+            'certification_status' => $profile->certification_status,
+        ], 403);
+    }
+
+    // 4. Request must still be pending
+    if ($inspectionRequest->status !== 'pending') {
+        return response()->json([
+            'message' => 'This inspection request is no longer available.',
+        ], 422);
+    }
+
+    // 5. Assign mechanic
+    $inspectionRequest->update([
+        'mechanic_id' => $user->id,
+        'status' => 'accepted',
+    ]);
+
+    // 6. Load relationships
+    $inspectionRequest->load([
+        'client:id,name,email',
+        'vehicle',
+        'mechanic:id,name,email',
+    ]);
+
+    return response()->json([
+        'message' => 'Inspection request accepted successfully.',
+        'inspection_request' => $inspectionRequest,
+    ]);
+}
 
     public function reject(
         Request $request,
