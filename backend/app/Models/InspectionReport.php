@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class InspectionReport extends Model
 {
-        protected $fillable = [
+    protected $fillable = [
         'appointment_id',
         'inspection_request_id',
         'client_id',
@@ -52,5 +52,10 @@ class InspectionReport extends Model
     public function mechanic()
     {
         return $this->belongsTo(User::class, 'mechanic_id');
+    }
+
+    public function review()
+    {
+        return $this->hasOne(Review::class);
     }
 }

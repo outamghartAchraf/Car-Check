@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\MechanicProfileController;
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\MechanicAvailabilityController;
 use App\Http\Controllers\Api\InspectionReportController;
+use App\Http\Controllers\Api\ReviewController;
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -133,5 +134,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get(
         '/inspection-reports/{inspectionReport}/pdf',
         [InspectionReportController::class, 'downloadPdf']
+    );
+
+    // Reviews
+
+    Route::post(
+        '/inspection-reports/{inspectionReport}/review',
+        [ReviewController::class, 'store']
+    );
+
+    Route::get(
+        '/mechanic/reviews',
+        [ReviewController::class, 'mechanicIndex']
     );
 });

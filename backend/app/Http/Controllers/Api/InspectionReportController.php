@@ -10,7 +10,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class InspectionReportController extends Controller
 {
-     public function store(Request $request, Appointment $appointment)
+    public function store(Request $request, Appointment $appointment)
     {
         $user = $request->user();
 
@@ -185,6 +185,7 @@ class InspectionReportController extends Controller
             'inspectionRequest.vehicle',
             'client:id,name,email',
             'mechanic:id,name,email',
+            'review',
         ]);
 
         return response()->json([
@@ -209,6 +210,7 @@ class InspectionReportController extends Controller
             'inspectionRequest.vehicle',
             'mechanic:id,name,email',
             'appointment',
+            'review',
         ])
             ->where('client_id', $user->id)
             ->latest()
@@ -247,39 +249,39 @@ class InspectionReportController extends Controller
     }
 
     public function downloadPdf(
-    Request $request,
-    InspectionReport $inspectionReport
-) {
-    $user = $request->user();
-
-    if (
-        $inspectionReport->client_id !== $user->id &&
-        $inspectionReport->mechanic_id !== $user->id
+        Request $request,
+        InspectionReport $inspectionReport
     ) {
-        return response()->json([
-            'message' => 'Unauthorized.',
-        ], 403);
+        $user = $request->user();
+
+        if (
+            $inspectionReport->client_id !== $user->id &&
+            $inspectionReport->mechanic_id !== $user->id
+        ) {
+            return response()->json([
+                'message' => 'Unauthorized.',
+            ], 403);
+        }
+
+        $inspectionReport->load([
+            'appointment',
+            'inspectionRequest.vehicle',
+            'client:id,name,email',
+            'mechanic:id,name,email',
+        ]);
+
+        $pdf = Pdf::loadView(
+            'pdf.inspection-report',
+            [
+                'report' => $inspectionReport,
+            ]
+        );
+
+        $fileName =
+            'carcheck-inspection-report-' .
+            $inspectionReport->id .
+            '.pdf';
+
+        return $pdf->download($fileName);
     }
-
-    $inspectionReport->load([
-        'appointment',
-        'inspectionRequest.vehicle',
-        'client:id,name,email',
-        'mechanic:id,name,email',
-    ]);
-
-    $pdf = Pdf::loadView(
-        'pdf.inspection-report',
-        [
-            'report' => $inspectionReport,
-        ]
-    );
-
-    $fileName =
-        'carcheck-inspection-report-' .
-        $inspectionReport->id .
-        '.pdf';
-
-    return $pdf->download($fileName);
-}
 }

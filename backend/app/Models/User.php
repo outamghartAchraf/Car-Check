@@ -103,4 +103,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(MechanicAvailability::class, 'mechanic_id');
     }
+
+    public function writtenReviews()
+    {
+        return $this->hasMany(Review::class, 'client_id');
+    }
+
+    public function receivedReviews()
+    {
+        return $this->hasMany(Review::class, 'mechanic_id');
+    }
 }

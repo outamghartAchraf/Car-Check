@@ -4,6 +4,9 @@ import {
   LayoutDashboard,
   LogOut,
   User,
+    Star,
+
+  FileText,
 } from "lucide-react";
 
 import {
@@ -74,6 +77,24 @@ export default function ClientDashboardLayout() {
     Dashboard
   </NavLink>
 
+             <NavLink
+    to="/dashboard/appointments"
+    end
+    className={({ isActive }) =>
+      `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium ${
+        isActive
+          ? "bg-blue-600 text-white"
+          : "text-slate-600 hover:bg-slate-100"
+      }`
+    }
+  >
+    <LayoutDashboard size={19} />
+
+    Appointments
+  </NavLink>
+
+
+
   <NavLink
     to="/dashboard/vehicles"
     className={({ isActive }) =>
@@ -104,7 +125,20 @@ export default function ClientDashboardLayout() {
     Inspections
   </NavLink>
 
- 
+   <NavLink
+  to="/dashboard/inspection-reports"
+  end
+  className={({ isActive }) =>
+    `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
+      isActive
+        ? "bg-blue-600 text-white shadow-sm"
+        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+    }`
+  }
+>
+  <FileText size={19} />
+  <span>Inspection Reports</span>
+</NavLink>
          
 
            
