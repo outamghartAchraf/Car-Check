@@ -14,6 +14,7 @@ class InspectionRequestController extends Controller
         $requests = InspectionRequest::with([
             'vehicle',
             'mechanic:id,name,email',
+            'appointment',
         ])
             ->where(
                 'client_id',
