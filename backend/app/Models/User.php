@@ -113,4 +113,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(Review::class, 'mechanic_id');
     }
+
+    public function uploadedInspectionPhotos()
+    {
+        return $this->hasMany(
+            InspectionPhoto::class,
+            'uploaded_by'
+        );
+    }
 }

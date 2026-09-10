@@ -46,4 +46,11 @@ class InspectionRequest extends Model
 {
     return $this->hasOne(InspectionReport::class);
 }
+
+public function photos()
+{
+    return $this->hasMany(
+        InspectionPhoto::class
+    );
+}
 }
