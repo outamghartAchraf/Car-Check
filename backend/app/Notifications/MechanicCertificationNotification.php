@@ -14,19 +14,14 @@ class MechanicCertificationNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
-    {
-        //
+     public function __construct(
+        public string $status
+    ) {
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -45,10 +40,24 @@ class MechanicCertificationNotification extends Notification
      *
      * @return array<string, mixed>
      */
-    public function toArray(object $notifiable): array
+  public function toArray(object $notifiable): array
     {
+        $isCertified = $this->status === 'certified';
+
         return [
-            //
+            'title' => $isCertified
+                ? 'Mechanic Account Certified'
+                : 'Mechanic Certification Rejected',
+
+            'message' => $isCertified
+                ? 'Your mechanic account has been certified. You can now accept inspection requests.'
+                : 'Your mechanic certification has been rejected by an administrator.',
+
+            'type' => 'mechanic_certification',
+
+            'action_url' => '/mechanic/profile',
+
+            'certification_status' => $this->status,
         ];
     }
 }

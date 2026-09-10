@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Notifications\MechanicCertificationNotification;
 
 class AdminMechanicController extends Controller
 {
@@ -30,7 +31,7 @@ class AdminMechanicController extends Controller
         ]);
     }
 
- 
+
     public function show(
         Request $request,
         User $mechanic
@@ -62,7 +63,7 @@ class AdminMechanicController extends Controller
         ]);
     }
 
-  
+
     public function certify(
         Request $request,
         User $mechanic
@@ -93,6 +94,10 @@ class AdminMechanicController extends Controller
             'certification_status' => 'certified',
         ]);
 
+        $mechanic->notify(
+            new MechanicCertificationNotification('certified')
+        );
+
         $mechanic->load('mechanicProfile');
 
         return response()->json([
@@ -101,7 +106,7 @@ class AdminMechanicController extends Controller
         ]);
     }
 
- 
+
     public function reject(
         Request $request,
         User $mechanic
@@ -131,6 +136,10 @@ class AdminMechanicController extends Controller
         $profile->update([
             'certification_status' => 'rejected',
         ]);
+
+        $mechanic->notify(
+            new MechanicCertificationNotification('rejected')
+        );
 
         $mechanic->load('mechanicProfile');
 

@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Models\Review;
 
 class NewReviewNotification extends Notification
 {
@@ -14,19 +15,14 @@ class NewReviewNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
-    {
-        //
+    public function __construct(
+        public Review $review
+    ) {
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -45,10 +41,18 @@ class NewReviewNotification extends Notification
      *
      * @return array<string, mixed>
      */
-    public function toArray(object $notifiable): array
+   public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title' => 'New Review',
+            'message' => sprintf(
+                '%s left you a %d/5 rating.',
+                $this->review->client?->name ?? 'A client',
+                $this->review->rating
+            ),
+            'type' => 'new_review',
+            'action_url' => '/mechanic/reviews',
+            'review_id' => $this->review->id,
         ];
     }
 }

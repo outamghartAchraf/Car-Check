@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\InspectionReport;
 use App\Models\Appointment;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Notifications\InspectionCompletedNotification;
 
 class InspectionReportController extends Controller
 {
@@ -143,6 +144,17 @@ class InspectionReportController extends Controller
             ...$validated,
         ]);
 
+        $report->load([
+            'inspectionRequest',
+            'appointment',
+        ]);
+
+        $report->client->notify(
+            new InspectionCompletedNotification(
+                $report
+            )
+        );
+
         $appointment->update([
             'status' => 'completed',
         ]);
@@ -150,6 +162,17 @@ class InspectionReportController extends Controller
         $appointment->inspectionRequest()->update([
             'status' => 'completed',
         ]);
+
+        $report->load([
+            'inspectionRequest',
+            'appointment',
+        ]);
+
+        $report->client->notify(
+            new InspectionCompletedNotification(
+                $report
+            )
+        );
 
         $report->load([
             'appointment',

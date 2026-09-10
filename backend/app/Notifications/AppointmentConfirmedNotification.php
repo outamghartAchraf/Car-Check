@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Models\Appointment;
 
 class AppointmentConfirmedNotification extends Notification
 {
@@ -14,20 +15,16 @@ class AppointmentConfirmedNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
-    {
-        //
+    public function __construct(
+        public Appointment $appointment
+    ) {
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
+
 
     /**
      * Get the mail representation of the notification.
@@ -45,10 +42,18 @@ class AppointmentConfirmedNotification extends Notification
      *
      * @return array<string, mixed>
      */
-    public function toArray(object $notifiable): array
+   public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title' => 'Appointment Confirmed',
+            'message' => sprintf(
+                'A new inspection appointment has been scheduled for %s at %s.',
+                $this->appointment->appointment_date->format('M d, Y'),
+                date('H:i', strtotime($this->appointment->start_time))
+            ),
+            'type' => 'appointment_confirmed',
+            'action_url' => '/mechanic/appointments',
+            'appointment_id' => $this->appointment->id,
         ];
     }
 }

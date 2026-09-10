@@ -6,17 +6,17 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\InspectionRequest;
+use App\Models\MechanicProfile;
 
-class InspectionRequestAcceptedNotification extends Notification
+class NewMechanicProfileNotification extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-  public function __construct(
-        public InspectionRequest $inspectionRequest
+ public function __construct(
+        public MechanicProfile $profile
     ) {
     }
 
@@ -24,7 +24,6 @@ class InspectionRequestAcceptedNotification extends Notification
     {
         return ['database'];
     }
-
     /**
      * Get the mail representation of the notification.
      */
@@ -41,19 +40,23 @@ class InspectionRequestAcceptedNotification extends Notification
      *
      * @return array<string, mixed>
      */
-    public function toArray(object $notifiable): array
+     public function toArray(object $notifiable): array
     {
-        $mechanic = $this->inspectionRequest->mechanic;
-
         return [
-            'title' => 'Inspection Request Accepted',
+            'title' => 'New Mechanic Certification Request',
+
             'message' => sprintf(
-                '%s has accepted your vehicle inspection request.',
-                $mechanic?->name ?? 'A mechanic'
+                '%s has created a mechanic profile and is waiting for certification.',
+                $this->profile->user?->name ?? 'A new mechanic'
             ),
-            'type' => 'inspection_request_accepted',
-            'action_url' => '/dashboard/inspection-requests',
-            'inspection_request_id' => $this->inspectionRequest->id,
+
+            'type' => 'mechanic_certification_request',
+
+            'action_url' => '/admin/mechanics',
+
+            'mechanic_id' => $this->profile->user_id,
+
+            'mechanic_profile_id' => $this->profile->id,
         ];
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\User;
+use App\Notifications\NewMechanicProfileNotification;
 
 class MechanicProfileController extends Controller
 {
@@ -54,6 +56,22 @@ class MechanicProfileController extends Controller
             'certification_status' => 'pending',
         ]);
 
+        /*
+    |--------------------------------------------------------------------------
+    | Notify administrators
+    |--------------------------------------------------------------------------
+    */
+
+        $admins = User::where('role', 'admin')->get();
+
+        $profile->load('user');
+
+        foreach ($admins as $admin) {
+            $admin->notify(
+                new NewMechanicProfileNotification($profile)
+            );
+        }
+
         return response()->json([
             'message' => 'Mechanic profile created successfully.',
             'profile' => $profile,
@@ -88,6 +106,22 @@ class MechanicProfileController extends Controller
         ]);
 
         $profile->update($validated);
+
+        /*
+    |--------------------------------------------------------------------------
+    | Notify administrators
+    |--------------------------------------------------------------------------
+    */
+
+        $admins = User::where('role', 'admin')->get();
+
+        $profile->load('user');
+
+        foreach ($admins as $admin) {
+            $admin->notify(
+                new NewMechanicProfileNotification($profile)
+            );
+        }
 
         return response()->json([
             'message' => 'Mechanic profile updated successfully.',

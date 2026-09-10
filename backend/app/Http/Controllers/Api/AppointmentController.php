@@ -8,6 +8,7 @@ use App\Models\Appointment;
 use App\Models\InspectionRequest;
 use App\Models\MechanicAvailability;
 use Carbon\Carbon;
+use App\Notifications\AppointmentConfirmedNotification;
 
 class AppointmentController extends Controller
 {
@@ -227,6 +228,14 @@ class AppointmentController extends Controller
             'notes' =>
             $validated['notes'] ?? null,
         ]);
+
+        $appointment->load('mechanic');
+
+        $appointment->mechanic->notify(
+            new AppointmentConfirmedNotification(
+                $appointment
+            )
+        );
 
         /*
         |--------------------------------------------------------------------------

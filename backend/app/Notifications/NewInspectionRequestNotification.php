@@ -6,6 +6,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use App\Models\InspectionRequest;
 
 class NewInspectionRequestNotification extends Notification
 {
@@ -14,19 +15,14 @@ class NewInspectionRequestNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
-    {
-        //
+  public function __construct(
+        public InspectionRequest $inspectionRequest
+    ) {
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['database'];
     }
 
     /**
@@ -45,10 +41,21 @@ class NewInspectionRequestNotification extends Notification
      *
      * @return array<string, mixed>
      */
-    public function toArray(object $notifiable): array
+      public function toArray(object $notifiable): array
     {
+        $vehicle = $this->inspectionRequest->vehicle;
+
         return [
-            //
+            'title' => 'New Inspection Request',
+            'message' => sprintf(
+                'A new %s inspection request is available for %s %s.',
+                ucfirst($this->inspectionRequest->package),
+                $vehicle?->brand ?? 'Unknown',
+                $vehicle?->model ?? 'Vehicle'
+            ),
+            'type' => 'inspection_request',
+            'action_url' => '/mechanic/inspection-requests',
+            'inspection_request_id' => $this->inspectionRequest->id,
         ];
     }
 }

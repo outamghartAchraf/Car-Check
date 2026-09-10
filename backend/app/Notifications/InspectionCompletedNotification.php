@@ -6,17 +6,17 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use App\Models\InspectionRequest;
+use App\Models\InspectionReport;
 
-class InspectionRequestAcceptedNotification extends Notification
+class InspectionCompletedNotification extends Notification
 {
     use Queueable;
 
     /**
      * Create a new notification instance.
      */
-  public function __construct(
-        public InspectionRequest $inspectionRequest
+    public function __construct(
+        public InspectionReport $report
     ) {
     }
 
@@ -43,17 +43,12 @@ class InspectionRequestAcceptedNotification extends Notification
      */
     public function toArray(object $notifiable): array
     {
-        $mechanic = $this->inspectionRequest->mechanic;
-
         return [
-            'title' => 'Inspection Request Accepted',
-            'message' => sprintf(
-                '%s has accepted your vehicle inspection request.',
-                $mechanic?->name ?? 'A mechanic'
-            ),
-            'type' => 'inspection_request_accepted',
-            'action_url' => '/dashboard/inspection-requests',
-            'inspection_request_id' => $this->inspectionRequest->id,
+            'title' => 'Inspection Completed',
+            'message' => 'Your vehicle inspection has been completed. Your inspection report is now available.',
+            'type' => 'inspection_completed',
+            'action_url' => '/dashboard/inspection-reports',
+            'inspection_report_id' => $this->report->id,
         ];
     }
 }
