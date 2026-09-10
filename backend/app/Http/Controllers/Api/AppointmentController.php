@@ -9,6 +9,7 @@ use App\Models\InspectionRequest;
 use App\Models\MechanicAvailability;
 use Carbon\Carbon;
 use App\Notifications\AppointmentConfirmedNotification;
+use App\Notifications\AppointmentBookedNotification;
 
 class AppointmentController extends Controller
 {
@@ -246,6 +247,16 @@ class AppointmentController extends Controller
         $inspectionRequest->update([
             'status' => 'scheduled',
         ]);
+
+        $appointment->load([
+            'client:id,name,email',
+            'mechanic:id,name,email',
+            'inspectionRequest.vehicle',
+        ]);
+
+        $appointment->client->notify(
+            new AppointmentBookedNotification($appointment)
+        );
 
         /*
         |--------------------------------------------------------------------------
