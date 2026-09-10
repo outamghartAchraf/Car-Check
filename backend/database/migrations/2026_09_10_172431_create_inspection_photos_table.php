@@ -13,6 +13,22 @@ return new class extends Migration
     {
         Schema::create('inspection_photos', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('inspection_request_id')
+                ->constrained('inspection_requests')
+                ->cascadeOnDelete();
+
+            $table->foreignId('inspection_report_id')
+                ->nullable()
+                ->constrained('inspection_reports')
+                ->cascadeOnDelete();
+
+            $table->foreignId('uploaded_by')
+                ->constrained('users')
+                ->cascadeOnDelete();
+
+            $table->string('photo_path');
+
+            $table->string('description')->nullable();
             $table->timestamps();
         });
     }
