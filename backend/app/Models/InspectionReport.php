@@ -58,4 +58,11 @@ class InspectionReport extends Model
     {
         return $this->hasOne(Review::class);
     }
+
+    public function photos()
+    {
+        return $this->hasMany(
+            InspectionPhoto::class
+        );
+    }
 }
