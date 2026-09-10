@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\InspectionRequest;
 use App\Models\Vehicle;
+use App\Notifications\NewInspectionRequestNotification;
+use App\Models\User;
+use App\Notifications\InspectionRequestAcceptedNotification;
+
 
 class InspectionRequestController extends Controller
 {
@@ -14,6 +18,7 @@ class InspectionRequestController extends Controller
         $requests = InspectionRequest::with([
             'vehicle',
             'mechanic:id,name,email',
+            'appointment',
         ])
             ->where(
                 'client_id',
@@ -104,6 +109,21 @@ class InspectionRequestController extends Controller
 
                 'status' => 'pending',
             ]);
+
+        $mechanics = User::where('role', 'mechanic')
+            
+            ->whereHas('mechanicProfile', function ($query) {
+                $query->where('certification_status', 'certified');
+            })
+            ->get();
+
+        foreach ($mechanics as $mechanic) {
+            $mechanic->notify(
+                new NewInspectionRequestNotification(
+                    $inspectionRequest->load('vehicle')
+                )
+            );
+        }
 
         $inspectionRequest->load('vehicle');
 
@@ -236,7 +256,7 @@ class InspectionRequestController extends Controller
         ]);
     }
 
-  
+
 
     public function mechanicIndex(Request $request)
     {
@@ -245,7 +265,7 @@ class InspectionRequestController extends Controller
         if ($user->role !== 'mechanic') {
             return response()->json([
                 'message' =>
-                    'Only mechanics can access inspection requests.',
+                'Only mechanics can access inspection requests.',
             ], 403);
         }
 
@@ -272,7 +292,7 @@ class InspectionRequestController extends Controller
         if ($user->role !== 'mechanic') {
             return response()->json([
                 'message' =>
-                    'Only mechanics can access this request.',
+                'Only mechanics can access this request.',
             ], 403);
         }
 
@@ -283,50 +303,69 @@ class InspectionRequestController extends Controller
 
         return response()->json([
             'inspection_request' =>
-                $inspectionRequest,
+            $inspectionRequest,
         ]);
     }
 
-    public function accept(
-        Request $request,
-        InspectionRequest $inspectionRequest
-    ) {
+    public function accept(Request $request, InspectionRequest $inspectionRequest)
+    {
         $user = $request->user();
 
+        // 1. Check user role
         if ($user->role !== 'mechanic') {
             return response()->json([
-                'message' =>
-                    'Only mechanics can accept requests.',
+                'message' => 'Only mechanics can accept inspection requests.',
             ], 403);
         }
 
-        if (
-            $inspectionRequest->status !== 'pending' ||
-            $inspectionRequest->mechanic_id !== null
-        ) {
+        // 2. Check mechanic profile
+        $profile = $user->mechanicProfile;
+
+        if (!$profile) {
             return response()->json([
-                'message' =>
-                    'This inspection request is no longer available.',
+                'message' => 'Please complete your mechanic profile before accepting inspection requests.',
             ], 422);
         }
 
+        // 3. Check certification status
+        if ($profile->certification_status !== 'certified') {
+            return response()->json([
+                'message' => 'Your mechanic account must be certified by an administrator before accepting inspection requests.',
+                'certification_status' => $profile->certification_status,
+            ], 403);
+        }
+
+        // 4. Request must still be pending
+        if ($inspectionRequest->status !== 'pending') {
+            return response()->json([
+                'message' => 'This inspection request is no longer available.',
+            ], 422);
+        }
+
+        // 5. Assign mechanic
         $inspectionRequest->update([
             'mechanic_id' => $user->id,
             'status' => 'accepted',
         ]);
 
+        $inspectionRequest->load('mechanic');
+
+        $inspectionRequest->client->notify(
+            new InspectionRequestAcceptedNotification(
+                $inspectionRequest
+            )
+        );
+
+        // 6. Load relationships
         $inspectionRequest->load([
-            'vehicle',
             'client:id,name,email',
+            'vehicle',
             'mechanic:id,name,email',
         ]);
 
         return response()->json([
-            'message' =>
-                'Inspection request accepted successfully.',
-
-            'inspection_request' =>
-                $inspectionRequest,
+            'message' => 'Inspection request accepted successfully.',
+            'inspection_request' => $inspectionRequest,
         ]);
     }
 
@@ -339,7 +378,7 @@ class InspectionRequestController extends Controller
         if ($user->role !== 'mechanic') {
             return response()->json([
                 'message' =>
-                    'Only mechanics can reject requests.',
+                'Only mechanics can reject requests.',
             ], 403);
         }
 
@@ -349,7 +388,7 @@ class InspectionRequestController extends Controller
         ) {
             return response()->json([
                 'message' =>
-                    'This inspection request is no longer available.',
+                'This inspection request is no longer available.',
             ], 422);
         }
 
@@ -366,10 +405,10 @@ class InspectionRequestController extends Controller
 
         return response()->json([
             'message' =>
-                'Inspection request rejected successfully.',
+            'Inspection request rejected successfully.',
 
             'inspection_request' =>
-                $inspectionRequest,
+            $inspectionRequest,
         ]);
     }
 

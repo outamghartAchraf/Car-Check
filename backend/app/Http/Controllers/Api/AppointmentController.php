@@ -8,10 +8,12 @@ use App\Models\Appointment;
 use App\Models\InspectionRequest;
 use App\Models\MechanicAvailability;
 use Carbon\Carbon;
+use App\Notifications\AppointmentConfirmedNotification;
+use App\Notifications\AppointmentBookedNotification;
 
 class AppointmentController extends Controller
 {
-     public function index(Request $request)
+    public function index(Request $request)
     {
         $user = $request->user();
 
@@ -29,9 +31,7 @@ class AppointmentController extends Controller
         ]);
     }
 
-    /**
-     * Create an appointment.
-     */
+
     public function store(Request $request)
     {
         $user = $request->user();
@@ -46,7 +46,6 @@ class AppointmentController extends Controller
             'appointment_date' => [
                 'required',
                 'date',
-                'after_or_equal:today',
             ],
 
             'start_time' => [
@@ -57,7 +56,6 @@ class AppointmentController extends Controller
             'end_time' => [
                 'required',
                 'date_format:H:i',
-                'after:start_time',
             ],
 
             'notes' => [
@@ -79,7 +77,7 @@ class AppointmentController extends Controller
         if ($inspectionRequest->client_id !== $user->id) {
             return response()->json([
                 'message' =>
-                    'You cannot create an appointment for this request.',
+                'You cannot create an appointment for this request.',
             ], 403);
         }
 
@@ -87,7 +85,7 @@ class AppointmentController extends Controller
         if (!$inspectionRequest->mechanic_id) {
             return response()->json([
                 'message' =>
-                    'This request has not been assigned to a mechanic yet.',
+                'This request has not been assigned to a mechanic yet.',
             ], 422);
         }
 
@@ -95,7 +93,7 @@ class AppointmentController extends Controller
         if ($inspectionRequest->status !== 'accepted') {
             return response()->json([
                 'message' =>
-                    'Only accepted inspection requests can be scheduled.',
+                'Only accepted inspection requests can be scheduled.',
             ], 422);
         }
 
@@ -103,7 +101,60 @@ class AppointmentController extends Controller
         if ($inspectionRequest->appointment) {
             return response()->json([
                 'message' =>
-                    'This inspection request already has an appointment.',
+                'This inspection request already has an appointment.',
+            ], 422);
+        }
+
+        $appointmentDate = Carbon::parse(
+            $validated['appointment_date']
+        );
+
+        if ($appointmentDate->isBefore(Carbon::today())) {
+            return response()->json([
+                'message' => 'You cannot book an appointment in the past.',
+            ], 422);
+        }
+
+        $startDateTime = Carbon::parse(
+            $validated['appointment_date'] . ' ' . $validated['start_time']
+        );
+
+        if ($appointmentDate->isToday() && $startDateTime->isPast()) {
+            return response()->json([
+                'message' => 'You cannot book a time that has already passed.',
+            ], 422);
+        }
+
+        $startTime = Carbon::parse(
+            $validated['appointment_date'] . ' ' . $validated['start_time']
+        );
+
+        $endTime = Carbon::parse(
+            $validated['appointment_date'] . ' ' . $validated['end_time']
+        );
+
+        if ($endTime->lessThanOrEqualTo($startTime)) {
+            return response()->json([
+                'message' => 'The appointment end time must be after the start time.',
+            ], 422);
+        }
+
+        // Verify that the selected time is inside the mechanic's availability.
+        $dayOfWeek = $appointmentDate->dayOfWeek;
+
+        $availability = MechanicAvailability::where(
+            'mechanic_id',
+            $inspectionRequest->mechanic_id
+        )
+            ->where('day_of_week', $dayOfWeek)
+            ->where('is_available', true)
+            ->where('start_time', '<=', $validated['start_time'])
+            ->where('end_time', '>=', $validated['end_time'])
+            ->first();
+
+        if (!$availability) {
+            return response()->json([
+                'message' => 'The selected time is outside the mechanic\'s availability.',
             ], 422);
         }
 
@@ -143,7 +194,7 @@ class AppointmentController extends Controller
         if ($conflict) {
             return response()->json([
                 'message' =>
-                    'This time slot is already booked.',
+                'This time slot is already booked.',
             ], 422);
         }
 
@@ -155,29 +206,37 @@ class AppointmentController extends Controller
 
         $appointment = Appointment::create([
             'inspection_request_id' =>
-                $inspectionRequest->id,
+            $inspectionRequest->id,
 
             'client_id' =>
-                $user->id,
+            $user->id,
 
             'mechanic_id' =>
-                $inspectionRequest->mechanic_id,
+            $inspectionRequest->mechanic_id,
 
             'appointment_date' =>
-                $validated['appointment_date'],
+            $validated['appointment_date'],
 
             'start_time' =>
-                $validated['start_time'],
+            $validated['start_time'],
 
             'end_time' =>
-                $validated['end_time'],
+            $validated['end_time'],
 
             'status' =>
-                'confirmed',
+            'confirmed',
 
             'notes' =>
-                $validated['notes'] ?? null,
+            $validated['notes'] ?? null,
         ]);
+
+        $appointment->load('mechanic');
+
+        $appointment->mechanic->notify(
+            new AppointmentConfirmedNotification(
+                $appointment
+            )
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -188,6 +247,16 @@ class AppointmentController extends Controller
         $inspectionRequest->update([
             'status' => 'scheduled',
         ]);
+
+        $appointment->load([
+            'client:id,name,email',
+            'mechanic:id,name,email',
+            'inspectionRequest.vehicle',
+        ]);
+
+        $appointment->client->notify(
+            new AppointmentBookedNotification($appointment)
+        );
 
         /*
         |--------------------------------------------------------------------------
@@ -203,10 +272,10 @@ class AppointmentController extends Controller
 
         return response()->json([
             'message' =>
-                'Appointment created successfully.',
+            'Appointment created successfully.',
 
             'appointment' =>
-                $appointment,
+            $appointment,
         ], 201);
     }
 
@@ -253,7 +322,7 @@ class AppointmentController extends Controller
         if ($appointment->client_id !== $user->id) {
             return response()->json([
                 'message' =>
-                    'Only the client can cancel this appointment.',
+                'Only the client can cancel this appointment.',
             ], 403);
         }
 
@@ -266,7 +335,7 @@ class AppointmentController extends Controller
         ) {
             return response()->json([
                 'message' =>
-                    'This appointment cannot be cancelled.',
+                'This appointment cannot be cancelled.',
             ], 422);
         }
 
@@ -281,166 +350,170 @@ class AppointmentController extends Controller
 
         return response()->json([
             'message' =>
-                'Appointment cancelled successfully.',
+            'Appointment cancelled successfully.',
         ]);
     }
 
     public function availableSlots(
-    Request $request,
-    InspectionRequest $inspectionRequest
-) {
-    $user = $request->user();
+        Request $request,
+        InspectionRequest $inspectionRequest
+    ) {
+        $user = $request->user();
 
-    // Only the client who owns the request can access its slots
-    if ($inspectionRequest->client_id !== $user->id) {
-        return response()->json([
-            'message' => 'Unauthorized.'
-        ], 403);
-    }
+        // Only the client who owns the request can access its slots
+        if ($inspectionRequest->client_id !== $user->id) {
+            return response()->json([
+                'message' => 'Unauthorized.'
+            ], 403);
+        }
 
-    // A mechanic must already be assigned
-    if (!$inspectionRequest->mechanic_id) {
-        return response()->json([
-            'message' => 'This inspection request has not been assigned to a mechanic yet.'
-        ], 422);
-    }
+        // A mechanic must already be assigned
+        if (!$inspectionRequest->mechanic_id) {
+            return response()->json([
+                'message' => 'This inspection request has not been assigned to a mechanic yet.'
+            ], 422);
+        }
 
-    // Request must be accepted
-    if ($inspectionRequest->status !== 'accepted') {
-        return response()->json([
-            'message' => 'Only accepted inspection requests can be scheduled.'
-        ], 422);
-    }
+        // Request must be accepted
+        if ($inspectionRequest->status !== 'accepted') {
+            return response()->json([
+                'message' => 'Only accepted inspection requests can be scheduled.'
+            ], 422);
+        }
 
-    $validated = $request->validate([
-        'date' => [
-            'required',
-            'date',
-            'after_or_equal:today'
-        ],
-    ]);
+        $validated = $request->validate([
+            'date' => [
+                'required',
+                'date',
+                'after_or_equal:today'
+            ],
+        ]);
 
-    $date = Carbon::parse($validated['date']);
+        $date = Carbon::parse($validated['date']);
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | Get mechanic availability for this day
     |--------------------------------------------------------------------------
     */
 
-    $availabilities = MechanicAvailability::where(
-        'mechanic_id',
-        $inspectionRequest->mechanic_id
-    )
-        ->where('day_of_week', $date->dayOfWeek)
-        ->where('is_available', true)
-        ->orderBy('start_time')
-        ->get();
+        $availabilities = MechanicAvailability::where(
+            'mechanic_id',
+            $inspectionRequest->mechanic_id
+        )
+            ->where('day_of_week', $date->dayOfWeek)
+            ->where('is_available', true)
+            ->orderBy('start_time')
+            ->get();
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | Get existing appointments for this mechanic/date
     |--------------------------------------------------------------------------
     */
 
-    $appointments = Appointment::where(
-        'mechanic_id',
-        $inspectionRequest->mechanic_id
-    )
-        ->whereDate('appointment_date', $date->toDateString())
-        ->whereIn('status', ['pending', 'confirmed'])
-        ->orderBy('start_time')
-        ->get();
+        $appointments = Appointment::where(
+            'mechanic_id',
+            $inspectionRequest->mechanic_id
+        )
+            ->whereDate('appointment_date', $date->toDateString())
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->orderBy('start_time')
+            ->get();
 
-    /*
+        /*
     |--------------------------------------------------------------------------
     | Generate 1-hour slots
     |--------------------------------------------------------------------------
     */
 
-    $slots = [];
+        $slots = [];
 
-    foreach ($availabilities as $availability) {
+        foreach ($availabilities as $availability) {
 
-        $start = Carbon::parse(
-            $date->toDateString() . ' ' . $availability->start_time
-        );
+            $start = Carbon::parse(
+                $date->toDateString() . ' ' . $availability->start_time
+            );
 
-        $end = Carbon::parse(
-            $date->toDateString() . ' ' . $availability->end_time
-        );
+            $end = Carbon::parse(
+                $date->toDateString() . ' ' . $availability->end_time
+            );
 
-        while ($start->copy()->addHour()->lte($end)) {
+            while ($start->copy()->addHour()->lte($end)) {
 
-            $slotStart = $start->copy();
-            $slotEnd = $start->copy()->addHour();
+                $slotStart = $start->copy();
+                $slotEnd = $start->copy()->addHour();
 
-            /*
+                if ($date->isToday() && $slotStart->isPast()) {
+                    $start->addHour();
+                    continue;
+                }
+
+                /*
             |--------------------------------------------------------------------------
             | Check if slot conflicts with an existing appointment
             |--------------------------------------------------------------------------
             */
 
-            $isBooked = $appointments->contains(function ($appointment) use (
-                $slotStart,
-                $slotEnd
-            ) {
-                $appointmentStart = Carbon::parse(
-                    $appointment->appointment_date->toDateString()
-                    . ' '
-                    . $appointment->start_time
-                );
+                $isBooked = $appointments->contains(function ($appointment) use (
+                    $slotStart,
+                    $slotEnd
+                ) {
+                    $appointmentStart = Carbon::parse(
+                        $appointment->appointment_date->toDateString()
+                            . ' '
+                            . $appointment->start_time
+                    );
 
-                $appointmentEnd = Carbon::parse(
-                    $appointment->appointment_date->toDateString()
-                    . ' '
-                    . $appointment->end_time
-                );
+                    $appointmentEnd = Carbon::parse(
+                        $appointment->appointment_date->toDateString()
+                            . ' '
+                            . $appointment->end_time
+                    );
 
-                return $appointmentStart->lt($slotEnd)
-                    && $appointmentEnd->gt($slotStart);
-            });
+                    return $appointmentStart->lt($slotEnd)
+                        && $appointmentEnd->gt($slotStart);
+                });
 
-            $slots[] = [
-                'start_time' => $slotStart->format('H:i'),
-                'end_time' => $slotEnd->format('H:i'),
-                'available' => !$isBooked,
-            ];
+                $slots[] = [
+                    'start_time' => $slotStart->format('H:i'),
+                    'end_time' => $slotEnd->format('H:i'),
+                    'available' => !$isBooked,
+                ];
 
-            $start->addHour();
+                $start->addHour();
+            }
         }
-    }
 
-    return response()->json([
-        'date' => $date->toDateString(),
-        'slots' => $slots,
-    ]);
-}
-
-public function mechanicIndex(Request $request)
-{
-    $user = $request->user();
-
-    // Only mechanics can access their appointments
-    if ($user->role !== 'mechanic') {
         return response()->json([
-            'message' => 'Only mechanics can access appointments.',
-        ], 403);
+            'date' => $date->toDateString(),
+            'slots' => $slots,
+        ]);
     }
 
-    $appointments = Appointment::with([
-        'inspectionRequest.vehicle',
-        'client:id,name,email',
-        'mechanic:id,name,email',
-    ])
-        ->where('mechanic_id', $user->id)
-        ->latest('appointment_date')
-        ->latest('start_time')
-        ->get();
+    public function mechanicIndex(Request $request)
+    {
+        $user = $request->user();
 
-    return response()->json([
-        'appointments' => $appointments,
-    ]);
-}
+        // Only mechanics can access their appointments
+        if ($user->role !== 'mechanic') {
+            return response()->json([
+                'message' => 'Only mechanics can access appointments.',
+            ], 403);
+        }
 
+        $appointments = Appointment::with([
+            'inspectionRequest.vehicle',
+            'client:id,name,email',
+            'mechanic:id,name,email',
+        ])
+            ->where('mechanic_id', $user->id)
+            ->latest('appointment_date')
+            ->latest('start_time')
+            ->get();
+
+        return response()->json([
+            'appointments' => $appointments,
+        ]);
+    }
 }

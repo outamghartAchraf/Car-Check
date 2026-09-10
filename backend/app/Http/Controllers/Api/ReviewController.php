@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\InspectionReport;
 use App\Models\Review;
+use App\Notifications\NewReviewNotification;
 
 class ReviewController extends Controller
 {
@@ -27,7 +28,7 @@ class ReviewController extends Controller
             ], 403);
         }
 
- 
+
         if ($inspectionReport->review()->exists()) {
             return response()->json([
                 'message' => 'You have already reviewed this inspection.',
@@ -57,6 +58,14 @@ class ReviewController extends Controller
             'comment' => $validated['comment'] ?? null,
         ]);
 
+        $review->load('client');
+
+        $review->mechanic->notify(
+            new NewReviewNotification(
+                $review
+            )
+        );
+
         $review->load([
             'client:id,name,email',
             'mechanic:id,name,email',
@@ -69,7 +78,7 @@ class ReviewController extends Controller
         ], 201);
     }
 
- 
+
     public function mechanicIndex(Request $request)
     {
         $user = $request->user();
