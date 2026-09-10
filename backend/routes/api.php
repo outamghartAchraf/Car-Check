@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\AdminClientController;
 use App\Http\Controllers\Api\AdminInspectionRequestController;
 use App\Http\Controllers\Api\AdminAppointmentController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\InspectionPhotoController;
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -221,7 +222,7 @@ Route::middleware('auth:sanctum')->group(function () {
         [NotificationController::class, 'index']
     );
 
-        Route::patch(
+    Route::patch(
         '/notifications/read-all',
         [NotificationController::class, 'markAllAsRead']
     );
@@ -236,5 +237,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete(
         '/notifications/{notification}',
         [NotificationController::class, 'destroy']
+    );
+
+    // Inspection Photos
+    Route::get(
+        '/inspection-requests/{inspectionRequest}/photos',
+        [InspectionPhotoController::class, 'index']
+    );
+
+    Route::post(
+        '/inspection-requests/{inspectionRequest}/photos',
+        [InspectionPhotoController::class, 'store']
+    );
+
+    Route::delete(
+        '/inspection-photos/{inspectionPhoto}',
+        [InspectionPhotoController::class, 'destroy']
+    );
+
+    Route::post(
+        '/inspection-reports/{inspectionReport}/photos',
+        [InspectionPhotoController::class, 'storeForReport']
     );
 });
