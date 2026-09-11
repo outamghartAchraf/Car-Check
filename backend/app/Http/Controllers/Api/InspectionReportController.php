@@ -144,16 +144,7 @@ class InspectionReportController extends Controller
             ...$validated,
         ]);
 
-        $report->load([
-            'inspectionRequest',
-            'appointment',
-        ]);
 
-        $report->client->notify(
-            new InspectionCompletedNotification(
-                $report
-            )
-        );
 
         $appointment->update([
             'status' => 'completed',
@@ -163,16 +154,7 @@ class InspectionReportController extends Controller
             'status' => 'completed',
         ]);
 
-        $report->load([
-            'inspectionRequest',
-            'appointment',
-        ]);
 
-        $report->client->notify(
-            new InspectionCompletedNotification(
-                $report
-            )
-        );
 
         $report->load([
             'appointment',
@@ -180,6 +162,10 @@ class InspectionReportController extends Controller
             'client:id,name,email',
             'mechanic:id,name,email',
         ]);
+
+        $report->client->notify(
+            new InspectionCompletedNotification($report)
+        );
 
         return response()->json([
             'message' => 'Inspection completed successfully.',
@@ -289,8 +275,10 @@ class InspectionReportController extends Controller
         $inspectionReport->load([
             'appointment',
             'inspectionRequest.vehicle',
+            'inspectionRequest',
             'client:id,name,email',
             'mechanic:id,name,email',
+            'photos',
         ]);
 
         $pdf = Pdf::loadView(
