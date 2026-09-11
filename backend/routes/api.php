@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\AdminInspectionRequestController;
 use App\Http\Controllers\Api\AdminAppointmentController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\InspectionPhotoController;
+use App\Http\Controllers\Api\ClientDashboardController;
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -258,5 +259,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post(
         '/inspection-reports/{inspectionReport}/photos',
         [InspectionPhotoController::class, 'storeForReport']
+    );
+
+    Route::get(
+        '/client/dashboard',
+        [ClientDashboardController::class, 'index']
     );
 });
