@@ -18,7 +18,8 @@ const authService = {
     name,
     email,
     password,
-    password_confirmation
+    password_confirmation,
+    role
   ) {
     await this.csrf();
 
@@ -27,6 +28,7 @@ const authService = {
       email,
       password,
       password_confirmation,
+      role,
     });
   },
 

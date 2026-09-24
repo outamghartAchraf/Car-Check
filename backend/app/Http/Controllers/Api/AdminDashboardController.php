@@ -20,111 +20,77 @@ class AdminDashboardController extends Controller
         // Only admins can access this dashboard
         if ($user->role !== 'admin') {
             return response()->json([
-                'message' => 'Only administrators can access this dashboard.',
+                'message' => 'Unauthorized.'
             ], 403);
         }
 
-        // Basic statistics
-        $totalClients = User::where('role', 'client')->count();
 
-        $totalMechanics = User::where('role', 'mechanic')->count();
 
-        $totalVehicles = Vehicle::count();
-
-        $totalInspectionRequests = InspectionRequest::count();
-
-        $totalAppointments = Appointment::count();
-
-        $totalCompletedInspections = InspectionReport::count();
-
-        // Inspection request statistics
-        $pendingRequests = InspectionRequest::where(
-            'status',
-            'pending'
+        $clientsCount = User::where(
+            'role',
+            'client'
         )->count();
 
-        $acceptedRequests = InspectionRequest::where(
-            'status',
-            'accepted'
+        $mechanicsCount = User::where(
+            'role',
+            'mechanic'
         )->count();
 
-        $scheduledRequests = InspectionRequest::where(
-            'status',
-            'scheduled'
-        )->count();
+        $inspectionRequestsCount = InspectionRequest::count();
 
-        $completedRequests = InspectionRequest::where(
-            'status',
-            'completed'
-        )->count();
+        $appointmentsCount = Appointment::count();
 
-        $cancelledRequests = InspectionRequest::where(
-            'status',
-            'cancelled'
-        )->count();
+        $completedInspectionsCount = InspectionReport::count();
+        $recentRequests = InspectionRequest::with([
+            'client:id,name',
+            'vehicle:id,brand,model,year',
+            'mechanic:id,name',
+        ])
+            ->latest()
+            ->take(5)
+            ->get();
 
-        $rejectedRequests = InspectionRequest::where(
-            'status',
-            'rejected'
-        )->count();
-
-        // Appointment statistics
-        $pendingAppointments = Appointment::where(
-            'status',
-            'pending'
-        )->count();
-
-        $confirmedAppointments = Appointment::where(
-            'status',
-            'confirmed'
-        )->count();
-
-        $completedAppointments = Appointment::where(
-            'status',
-            'completed'
-        )->count();
-
-        $cancelledAppointments = Appointment::where(
-            'status',
-            'cancelled'
-        )->count();
-
-        // Mechanics waiting for certification
         $pendingMechanics = User::where('role', 'mechanic')
             ->whereHas('mechanicProfile', function ($query) {
-                $query->where(
-                    'certification_status',
-                    'pending'
-                );
+                $query->where('certification_status', 'pending');
             })
-            ->count();
+            ->with('mechanicProfile')
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $upcomingAppointments = Appointment::with([
+            'client:id,name',
+            'mechanic:id,name',
+            'inspectionRequest:id,vehicle_id,package,status',
+            'inspectionRequest.vehicle:id,brand,model,year',
+        ])
+            ->whereIn('status', [
+                'pending',
+                'confirmed'
+            ])
+            ->whereDate(
+                'appointment_date',
+                '>=',
+                now()->toDateString()
+            )
+            ->orderBy('appointment_date')
+            ->orderBy('start_time')
+            ->take(5)
+            ->get();
 
         return response()->json([
             'statistics' => [
-                'total_clients' => $totalClients,
-                'total_mechanics' => $totalMechanics,
-                'total_vehicles' => $totalVehicles,
-                'total_inspection_requests' => $totalInspectionRequests,
-                'total_appointments' => $totalAppointments,
-                'total_completed_inspections' => $totalCompletedInspections,
-                'pending_mechanics' => $pendingMechanics,
+                'clients' => $clientsCount,
+                'mechanics' => $mechanicsCount,
+                'inspection_requests' => $inspectionRequestsCount,
+                'appointments' => $appointmentsCount,
+                'completed_inspections' => $completedInspectionsCount,
             ],
 
-            'inspection_requests' => [
-                'pending' => $pendingRequests,
-                'accepted' => $acceptedRequests,
-                'scheduled' => $scheduledRequests,
-                'completed' => $completedRequests,
-                'cancelled' => $cancelledRequests,
-                'rejected' => $rejectedRequests,
-            ],
-
-            'appointments' => [
-                'pending' => $pendingAppointments,
-                'confirmed' => $confirmedAppointments,
-                'completed' => $completedAppointments,
-                'cancelled' => $cancelledAppointments,
-            ],
+            'recent_requests' => $recentRequests,
+            'pending_mechanics' => $pendingMechanics,
+            'upcoming_appointments' => $upcomingAppointments,
         ]);
     }
 }

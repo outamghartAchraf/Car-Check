@@ -19,22 +19,22 @@ import inspectionRequestService from "../../services/inspectionRequestService";
 const statusConfig = {
   pending: {
     label: "Pending",
-    className: "bg-amber-50 text-amber-700 border-amber-200",
+    className: "bg-[#A8631F]/10 text-[#A8631F] border-[#A8631F]/20",
     icon: AlertCircle,
   },
   confirmed: {
     label: "Confirmed",
-    className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    className: "bg-[#3D6FB4]/10 text-[#3D6FB4] border-[#3D6FB4]/20",
     icon: CheckCircle2,
   },
   completed: {
     label: "Completed",
-    className: "bg-blue-50 text-blue-700 border-blue-200",
+    className: "bg-[#3D8B5F]/10 text-[#3D8B5F] border-[#3D8B5F]/20",
     icon: CheckCircle2,
   },
   cancelled: {
     label: "Cancelled",
-    className: "bg-red-50 text-red-700 border-red-200",
+    className: "bg-[#C0483F]/10 text-[#C0483F] border-[#C0483F]/20",
     icon: X,
   },
 };
@@ -51,14 +51,13 @@ function formatDate(date) {
 
 function formatTime(time) {
   if (!time) return "-";
-
   return time.substring(0, 5);
 }
 
 function StatusBadge({ status }) {
   const config = statusConfig[status] || {
     label: status,
-    className: "bg-gray-50 text-gray-700 border-gray-200",
+    className: "bg-[#F1EDE7] text-[#6B655C] border-[#E8E3DC]",
     icon: AlertCircle,
   };
 
@@ -126,8 +125,7 @@ export default function Appointments() {
       console.error(err);
 
       setError(
-        err.response?.data?.message ||
-          "Unable to load appointments."
+        err.response?.data?.message || "Unable to load appointments."
       );
     } finally {
       setLoading(false);
@@ -156,9 +154,7 @@ export default function Appointments() {
 
       // Only accepted requests without appointment
       const availableRequests = requests.filter(
-        (request) =>
-          request.status === "accepted" &&
-          !request.appointment
+        (request) => request.status === "accepted" && !request.appointment
       );
 
       setInspectionRequests(availableRequests);
@@ -166,8 +162,7 @@ export default function Appointments() {
       console.error(err);
 
       setError(
-        err.response?.data?.message ||
-          "Unable to load inspection requests."
+        err.response?.data?.message || "Unable to load inspection requests."
       );
     } finally {
       setLoadingRequests(false);
@@ -242,11 +237,10 @@ export default function Appointments() {
       setError("");
       setSelectedSlot(null);
 
-      const response =
-        await appointmentService.getAvailableSlots(
-          selectedRequest.id,
-          date
-        );
+      const response = await appointmentService.getAvailableSlots(
+        selectedRequest.id,
+        date
+      );
 
       setSlots(response.data?.slots || []);
     } catch (err) {
@@ -255,8 +249,7 @@ export default function Appointments() {
       setSlots([]);
 
       setError(
-        err.response?.data?.message ||
-          "Unable to load available time slots."
+        err.response?.data?.message || "Unable to load available time slots."
       );
     } finally {
       setLoadingSlots(false);
@@ -308,9 +301,7 @@ export default function Appointments() {
         notes: notes || null,
       });
 
-      setSuccess(
-        "Appointment created successfully."
-      );
+      setSuccess("Appointment created successfully.");
 
       closeBookingModal();
 
@@ -319,8 +310,7 @@ export default function Appointments() {
       console.error(err);
 
       setError(
-        err.response?.data?.message ||
-          "Unable to create appointment."
+        err.response?.data?.message || "Unable to create appointment."
       );
     } finally {
       setBooking(false);
@@ -347,17 +337,14 @@ export default function Appointments() {
 
       await appointmentService.cancel(id);
 
-      setSuccess(
-        "Appointment cancelled successfully."
-      );
+      setSuccess("Appointment cancelled successfully.");
 
       await loadAppointments(true);
     } catch (err) {
       console.error(err);
 
       setError(
-        err.response?.data?.message ||
-          "Unable to cancel appointment."
+        err.response?.data?.message || "Unable to cancel appointment."
       );
     } finally {
       setCancellingId(null);
@@ -374,14 +361,8 @@ export default function Appointments() {
     return (
       <div className="flex min-h-[500px] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2
-            size={34}
-            className="animate-spin text-blue-600"
-          />
-
-          <p className="text-sm text-gray-500">
-            Loading appointments...
-          </p>
+          <Loader2 size={30} className="animate-spin text-[#B8632E]" />
+          <p className="text-sm text-[#9A948B]">Loading appointments…</p>
         </div>
       </div>
     );
@@ -396,19 +377,18 @@ export default function Appointments() {
   return (
     <div className="space-y-6">
       {/* Header */}
-
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <div className="mb-2 flex items-center gap-2 text-sm font-medium text-blue-600">
-            <CalendarDays size={18} />
-            Appointment Management
+          <div className="mb-2 flex items-center gap-2 text-sm font-medium text-[#B8632E]">
+            <CalendarDays size={17} strokeWidth={1.75} />
+            Appointment management
           </div>
 
-          <h1 className="text-2xl font-bold text-gray-900">
-            My Appointments
+          <h1 className="text-xl font-semibold tracking-tight text-[#201F1D]">
+            My appointments
           </h1>
 
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-[#8A8478]">
             Manage your vehicle inspection appointments.
           </p>
         </div>
@@ -418,282 +398,188 @@ export default function Appointments() {
             type="button"
             onClick={() => loadAppointments(true)}
             disabled={refreshing}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50 disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#E8E3DC] bg-white px-4 py-2.5 text-sm font-medium text-[#3A3733] transition-colors hover:bg-[#F1EDE7] disabled:opacity-60"
           >
-            <RefreshCw
-              size={17}
-              className={
-                refreshing ? "animate-spin" : ""
-              }
-            />
-
+            <RefreshCw size={16} strokeWidth={1.75} className={refreshing ? "animate-spin" : ""} />
             Refresh
           </button>
 
           <button
             type="button"
             onClick={openBookingModal}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#B8632E] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#A6572A]"
           >
-            <Calendar size={17} />
-
-            Book Inspection
+            <Calendar size={16} strokeWidth={1.75} />
+            Book inspection
           </button>
         </div>
       </div>
 
       {/* Messages */}
-
       {error && (
-        <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          <AlertCircle
-            size={18}
-            className="mt-0.5 shrink-0"
-          />
-
+        <div className="flex items-start gap-3 rounded-xl border border-[#C0483F]/20 bg-[#C0483F]/10 p-4 text-sm text-[#C0483F]">
+          <AlertCircle size={17} strokeWidth={1.75} className="mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {success && (
-        <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-          <CheckCircle2
-            size={18}
-            className="mt-0.5 shrink-0"
-          />
-
+        <div className="flex items-start gap-3 rounded-xl border border-[#3D8B5F]/20 bg-[#3D8B5F]/10 p-4 text-sm text-[#3D8B5F]">
+          <CheckCircle2 size={17} strokeWidth={1.75} className="mt-0.5 shrink-0" />
           <span>{success}</span>
         </div>
       )}
 
       {/* Empty */}
-
       {appointments.length === 0 ? (
-        <div className="rounded-2xl border border-gray-200 bg-white p-12 text-center shadow-sm">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50">
-            <Calendar
-              size={30}
-              className="text-blue-600"
-            />
+        <div className="rounded-2xl border border-[#E8E3DC] bg-white p-12 text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[#B8632E]/10">
+            <Calendar size={26} strokeWidth={1.75} className="text-[#B8632E]" />
           </div>
 
-          <h2 className="text-lg font-bold text-gray-900">
-            No appointments yet
-          </h2>
+          <h2 className="text-lg font-semibold text-[#201F1D]">No appointments yet</h2>
 
-          <p className="mx-auto mt-2 max-w-md text-sm text-gray-500">
-            Once a mechanic accepts your inspection
-            request, you can schedule an appointment.
+          <p className="mx-auto mt-2 max-w-md text-sm text-[#8A8478]">
+            Once a mechanic accepts your inspection request, you can schedule an appointment.
           </p>
 
           <button
             type="button"
             onClick={openBookingModal}
-            className="mt-6 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700"
+            className="mt-6 rounded-xl bg-[#B8632E] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#A6572A]"
           >
-            Book an Inspection
+            Book an inspection
           </button>
         </div>
       ) : (
         <div className="grid gap-5">
-          {appointments.map((appointment) => (
-            <div
-              key={appointment.id}
-              className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm"
-            >
-              {/* Card header */}
+          {appointments.map((appointment) => {
+            const stripe =
+              {
+                pending: "bg-[#A8631F]",
+                confirmed: "bg-[#3D6FB4]",
+                completed: "bg-[#3D8B5F]",
+                cancelled: "bg-[#C0483F]",
+              }[appointment.status] || "bg-[#D8D2C8]";
 
-              <div className="flex flex-col gap-3 border-b border-gray-100 p-5 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                    Appointment #{appointment.id}
-                  </p>
+            return (
+              <div
+                key={appointment.id}
+                className="group flex flex-col overflow-hidden rounded-2xl border border-[#E8E3DC] bg-white transition-shadow hover:shadow-[0_8px_30px_-12px_rgba(32,31,29,0.15)] sm:flex-row"
+              >
+                {/* Details stub */}
+                <div className="flex-1 p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-mono text-xs uppercase tracking-wider text-[#9A948B]">
+                        Appointment #{appointment.id}
+                      </p>
+                      <h2 className="mt-1 text-base font-semibold text-[#201F1D]">
+                        Vehicle inspection
+                      </h2>
+                    </div>
 
-                  <h2 className="mt-1 text-lg font-bold text-gray-900">
-                    Vehicle Inspection
-                  </h2>
+                    <StatusBadge status={appointment.status} />
+                  </div>
+
+                  <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-3">
+                    <div className="flex items-center gap-2">
+                      <Car size={15} strokeWidth={1.75} className="text-[#B8632E]" />
+                      <div>
+                        <p className="text-sm text-[#201F1D]">
+                          {appointment.inspection_request?.vehicle?.brand || "-"}{" "}
+                          {appointment.inspection_request?.vehicle?.model || ""}
+                        </p>
+                        <p className="font-mono text-xs text-[#9A948B]">
+                          {appointment.inspection_request?.vehicle?.registration_number ||
+                            "No registration"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <User size={15} strokeWidth={1.75} className="text-[#7A5FC7]" />
+                      <div>
+                        <p className="text-sm text-[#201F1D]">
+                          {appointment.mechanic?.name || "Assigned mechanic"}
+                        </p>
+                        <p className="text-xs text-[#9A948B]">
+                          {appointment.mechanic?.email || ""}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {appointment.inspection_request?.location && (
+                    <div className="mt-3 flex items-center gap-2 text-sm text-[#6B655C]">
+                      <MapPin size={14} strokeWidth={1.75} className="shrink-0 text-[#9A948B]" />
+                      <span>{appointment.inspection_request.location}</span>
+                    </div>
+                  )}
+
+                  {["pending", "confirmed"].includes(appointment.status) && (
+                    <button
+                      type="button"
+                      onClick={() => handleCancel(appointment.id)}
+                      disabled={cancellingId === appointment.id}
+                      className="mt-4 inline-flex items-center gap-2 rounded-lg border border-[#C0483F]/20 px-3 py-1.5 text-xs font-medium text-[#C0483F] transition-colors hover:bg-[#C0483F]/10 disabled:opacity-60"
+                    >
+                      {cancellingId === appointment.id ? (
+                        <Loader2 size={13} className="animate-spin" />
+                      ) : (
+                        <X size={13} strokeWidth={1.75} />
+                      )}
+                      Cancel appointment
+                    </button>
+                  )}
                 </div>
 
-                <StatusBadge
-                  status={appointment.status}
-                />
-              </div>
-
-              {/* Card body */}
-
-              <div className="grid gap-5 p-5 md:grid-cols-2 lg:grid-cols-4">
-                {/* Vehicle */}
-
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xl bg-blue-50 p-2.5">
-                    <Car
-                      size={19}
-                      className="text-blue-600"
-                    />
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-medium text-gray-400">
-                      Vehicle
-                    </p>
-
-                    <p className="mt-1 font-semibold text-gray-900">
-                      {appointment.inspection_request
-                        ?.vehicle?.brand || "-"}{" "}
-                      {appointment.inspection_request
-                        ?.vehicle?.model || ""}
-                    </p>
-
-                    <p className="text-xs text-gray-500">
-                      {appointment.inspection_request
-                        ?.vehicle?.registration_number ||
-                        "No registration"}
-                    </p>
-                  </div>
+                {/* Perforated divider */}
+                <div className="relative hidden w-0 border-l-2 border-dashed border-[#E8E3DC] sm:block">
+                  <span className="absolute -top-2.5 left-1/2 h-5 w-5 -translate-x-1/2 rounded-full bg-[#F7F5F2]" />
+                  <span className="absolute -bottom-2.5 left-1/2 h-5 w-5 -translate-x-1/2 rounded-full bg-[#F7F5F2]" />
                 </div>
+                <div className="border-t border-dashed border-[#E8E3DC] sm:hidden" />
 
-                {/* Mechanic */}
-
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xl bg-purple-50 p-2.5">
-                    <User
-                      size={19}
-                      className="text-purple-600"
-                    />
-                  </div>
+                {/* Date / time stub */}
+                <div className="relative flex shrink-0 flex-col justify-center gap-3 overflow-hidden bg-[#FAF8F5] p-5 sm:w-48">
+                  <div className={`absolute inset-x-0 top-0 h-1 ${stripe}`} />
 
                   <div>
-                    <p className="text-xs font-medium text-gray-400">
-                      Mechanic
-                    </p>
-
-                    <p className="mt-1 font-semibold text-gray-900">
-                      {appointment.mechanic?.name ||
-                        "Assigned mechanic"}
-                    </p>
-
-                    <p className="text-xs text-gray-500">
-                      {appointment.mechanic?.email ||
-                        ""}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Date */}
-
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xl bg-emerald-50 p-2.5">
-                    <Calendar
-                      size={19}
-                      className="text-emerald-600"
-                    />
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-medium text-gray-400">
+                    <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-[#9A948B]">
+                      <Calendar size={12} strokeWidth={1.75} />
                       Date
                     </p>
-
-                    <p className="mt-1 font-semibold text-gray-900">
-                      {formatDate(
-                        appointment.appointment_date
-                      )}
+                    <p className="mt-1 text-sm font-semibold text-[#201F1D]">
+                      {formatDate(appointment.appointment_date)}
                     </p>
-                  </div>
-                </div>
-
-                {/* Time */}
-
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xl bg-amber-50 p-2.5">
-                    <Clock
-                      size={19}
-                      className="text-amber-600"
-                    />
                   </div>
 
                   <div>
-                    <p className="text-xs font-medium text-gray-400">
+                    <p className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-[#9A948B]">
+                      <Clock size={12} strokeWidth={1.75} />
                       Time
                     </p>
-
-                    <p className="mt-1 font-semibold text-gray-900">
-                      {formatTime(
-                        appointment.start_time
-                      )}{" "}
-                      -{" "}
-                      {formatTime(
-                        appointment.end_time
-                      )}
+                    <p className="mt-1 font-mono text-sm font-semibold text-[#201F1D]">
+                      {formatTime(appointment.start_time)} – {formatTime(appointment.end_time)}
                     </p>
                   </div>
                 </div>
               </div>
-
-              {/* Location */}
-
-              {appointment.inspection_request
-                ?.location && (
-                <div className="mx-5 mb-5 flex items-center gap-2 rounded-xl bg-gray-50 p-3 text-sm text-gray-600">
-                  <MapPin
-                    size={17}
-                    className="text-gray-400"
-                  />
-
-                  <span>
-                    {appointment.inspection_request.location}
-                  </span>
-                </div>
-              )}
-
-              {/* Actions */}
-
-              {["pending", "confirmed"].includes(
-                appointment.status
-              ) && (
-                <div className="flex justify-end border-t border-gray-100 bg-gray-50 px-5 py-4">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      handleCancel(appointment.id)
-                    }
-                    disabled={
-                      cancellingId === appointment.id
-                    }
-                    className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-60"
-                  >
-                    {cancellingId === appointment.id ? (
-                      <Loader2
-                        size={16}
-                        className="animate-spin"
-                      />
-                    ) : (
-                      <X size={16} />
-                    )}
-
-                    Cancel Appointment
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {/* Booking Modal */}
-
       {showBookingModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
           <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
             {/* Modal header */}
-
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white px-6 py-5">
+            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#F1EDE7] bg-white px-6 py-5">
               <div>
-                <h2 className="text-lg font-bold text-gray-900">
-                  Book Inspection
-                </h2>
-
-                <p className="mt-1 text-sm text-gray-500">
+                <h2 className="text-lg font-semibold text-[#201F1D]">Book inspection</h2>
+                <p className="mt-1 text-sm text-[#8A8478]">
                   Choose a date and an available time slot.
                 </p>
               </div>
@@ -701,88 +587,60 @@ export default function Appointments() {
               <button
                 type="button"
                 onClick={closeBookingModal}
-                className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                className="rounded-lg p-2 text-[#9A948B] transition-colors hover:bg-[#F1EDE7] hover:text-[#3A3733]"
               >
-                <X size={20} />
+                <X size={19} />
               </button>
             </div>
 
-            <form
-              onSubmit={handleBooking}
-              className="space-y-6 p-6"
-            >
+            <form onSubmit={handleBooking} className="space-y-6 p-6">
               {/* Request */}
-
               <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Inspection Request
+                <label className="mb-2 block text-sm font-medium text-[#3A3733]">
+                  Inspection request
                 </label>
 
                 {loadingRequests ? (
-                  <div className="flex items-center gap-2 rounded-xl border border-gray-200 p-3 text-sm text-gray-500">
-                    <Loader2
-                      size={17}
-                      className="animate-spin"
-                    />
-
-                    Loading requests...
+                  <div className="flex items-center gap-2 rounded-xl border border-[#E8E3DC] p-3 text-sm text-[#9A948B]">
+                    <Loader2 size={16} className="animate-spin" />
+                    Loading requests…
                   </div>
-                ) : inspectionRequests.length ===
-                  0 ? (
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
-                    You don't have any accepted inspection
-                    requests available for booking.
+                ) : inspectionRequests.length === 0 ? (
+                  <div className="rounded-xl border border-[#A8631F]/20 bg-[#A8631F]/10 p-4 text-sm text-[#A8631F]">
+                    You don't have any accepted inspection requests available for booking.
                   </div>
                 ) : (
                   <select
                     value={selectedRequest?.id || ""}
                     onChange={handleRequestChange}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="w-full rounded-xl border border-[#E8E3DC] bg-white px-4 py-3 text-sm text-[#201F1D] outline-none transition focus:border-[#B8632E]/40 focus:ring-2 focus:ring-[#B8632E]/10"
                   >
-                    <option value="">
-                      Select an inspection request
-                    </option>
+                    <option value="">Select an inspection request</option>
 
-                    {inspectionRequests.map(
-                      (request) => (
-                        <option
-                          key={request.id}
-                          value={request.id}
-                        >
-                          #{request.id} -{" "}
-                          {request.vehicle?.brand}{" "}
-                          {request.vehicle?.model}
-                        </option>
-                      )
-                    )}
+                    {inspectionRequests.map((request) => (
+                      <option key={request.id} value={request.id}>
+                        #{request.id} - {request.vehicle?.brand} {request.vehicle?.model}
+                      </option>
+                    ))}
                   </select>
                 )}
               </div>
 
               {/* Selected request info */}
-
               {selectedRequest && (
-                <div className="rounded-xl border border-blue-100 bg-blue-50 p-4">
+                <div className="rounded-xl border border-[#B8632E]/20 bg-[#B8632E]/[0.06] p-4">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <div>
-                      <p className="text-xs text-blue-500">
-                        Vehicle
-                      </p>
-
-                      <p className="mt-1 font-semibold text-blue-950">
-                        {selectedRequest.vehicle?.brand}{" "}
-                        {selectedRequest.vehicle?.model}
+                      <p className="text-xs text-[#B8632E]">Vehicle</p>
+                      <p className="mt-1 font-medium text-[#201F1D]">
+                        {selectedRequest.vehicle?.brand} {selectedRequest.vehicle?.model}
                       </p>
                     </div>
 
                     <div>
-                      <p className="text-xs text-blue-500">
-                        Mechanic
-                      </p>
-
-                      <p className="mt-1 font-semibold text-blue-950">
-                        {selectedRequest.mechanic
-                          ?.name || "Assigned mechanic"}
+                      <p className="text-xs text-[#B8632E]">Mechanic</p>
+                      <p className="mt-1 font-medium text-[#201F1D]">
+                        {selectedRequest.mechanic?.name || "Assigned mechanic"}
                       </p>
                     </div>
                   </div>
@@ -790,86 +648,62 @@ export default function Appointments() {
               )}
 
               {/* Date */}
-
               <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-700">
-                  Appointment Date
+                <label className="mb-2 block text-sm font-medium text-[#3A3733]">
+                  Appointment date
                 </label>
 
                 <input
                   type="date"
                   value={selectedDate}
-                  min={
-                    new Date()
-                      .toISOString()
-                      .split("T")[0]
-                  }
+                  min={new Date().toISOString().split("T")[0]}
                   onChange={handleDateChange}
                   disabled={!selectedRequest}
-                  className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-gray-100"
+                  className="w-full rounded-xl border border-[#E8E3DC] bg-white px-4 py-3 text-sm text-[#201F1D] outline-none transition focus:border-[#B8632E]/40 focus:ring-2 focus:ring-[#B8632E]/10 disabled:bg-[#F1EDE7]"
                 />
               </div>
 
               {/* Slots */}
-
               {selectedDate && (
                 <div>
                   <div className="mb-3 flex items-center justify-between">
-                    <label className="text-sm font-semibold text-gray-700">
-                      Available Time Slots
+                    <label className="text-sm font-medium text-[#3A3733]">
+                      Available time slots
                     </label>
 
                     {loadingSlots && (
-                      <Loader2
-                        size={17}
-                        className="animate-spin text-blue-600"
-                      />
+                      <Loader2 size={16} className="animate-spin text-[#B8632E]" />
                     )}
                   </div>
 
-                  {!loadingSlots &&
-                    slots.length === 0 && (
-                      <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-center text-sm text-gray-500">
-                        No available slots for this date.
-                      </div>
-                    )}
+                  {!loadingSlots && slots.length === 0 && (
+                    <div className="rounded-xl border border-[#E8E3DC] bg-[#FAF8F5] p-4 text-center text-sm text-[#9A948B]">
+                      No available slots for this date.
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                     {slots.map((slot) => {
                       const isSelected =
-                        selectedSlot?.start_time ===
-                          slot.start_time &&
-                        selectedSlot?.end_time ===
-                          slot.end_time;
+                        selectedSlot?.start_time === slot.start_time &&
+                        selectedSlot?.end_time === slot.end_time;
 
                       return (
                         <button
                           key={`${slot.start_time}-${slot.end_time}`}
                           type="button"
                           disabled={!slot.available}
-                          onClick={() =>
-                            setSelectedSlot(slot)
-                          }
-                          className={`rounded-xl border px-3 py-3 text-sm font-semibold transition ${
+                          onClick={() => setSelectedSlot(slot)}
+                          className={`rounded-xl border px-3 py-3 text-sm font-medium transition-colors ${
                             !slot.available
-                              ? "cursor-not-allowed border-gray-100 bg-gray-100 text-gray-400"
+                              ? "cursor-not-allowed border-[#F1EDE7] bg-[#F1EDE7] text-[#B5AFA5]"
                               : isSelected
-                              ? "border-blue-600 bg-blue-600 text-white"
-                              : "border-gray-200 bg-white text-gray-700 hover:border-blue-400 hover:bg-blue-50"
+                              ? "border-[#B8632E] bg-[#B8632E] text-white"
+                              : "border-[#E8E3DC] bg-white text-[#3A3733] hover:border-[#B8632E]/40 hover:bg-[#B8632E]/[0.06]"
                           }`}
                         >
-                          <Clock
-                            size={15}
-                            className="mx-auto mb-1"
-                          />
-
-                          {formatTime(
-                            slot.start_time
-                          )}{" "}
-                          -{" "}
-                          {formatTime(
-                            slot.end_time
-                          )}
+                          <Clock size={14} strokeWidth={1.75} className="mx-auto mb-1" />
+                          {formatTime(slot.start_time)} – {formatTime(slot.end_time)}
                         </button>
                       );
                     })}
@@ -878,56 +712,39 @@ export default function Appointments() {
               )}
 
               {/* Notes */}
-
               <div>
-                <label className="mb-2 block text-sm font-semibold text-gray-700">
+                <label className="mb-2 block text-sm font-medium text-[#3A3733]">
                   Notes
-                  <span className="ml-1 font-normal text-gray-400">
-                    (optional)
-                  </span>
+                  <span className="ml-1 font-normal text-[#9A948B]">(optional)</span>
                 </label>
 
                 <textarea
                   value={notes}
-                  onChange={(event) =>
-                    setNotes(event.target.value)
-                  }
+                  onChange={(event) => setNotes(event.target.value)}
                   rows={4}
                   maxLength={2000}
-                  placeholder="Add any additional information..."
-                  className="w-full resize-none rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder="Add any additional information…"
+                  className="w-full resize-none rounded-xl border border-[#E8E3DC] px-4 py-3 text-sm text-[#201F1D] outline-none transition placeholder:text-[#9A948B] focus:border-[#B8632E]/40 focus:ring-2 focus:ring-[#B8632E]/10"
                 />
               </div>
 
               {/* Footer */}
-
-              <div className="flex flex-col-reverse gap-3 border-t border-gray-100 pt-5 sm:flex-row sm:justify-end">
+              <div className="flex flex-col-reverse gap-3 border-t border-[#F1EDE7] pt-5 sm:flex-row sm:justify-end">
                 <button
                   type="button"
                   onClick={closeBookingModal}
-                  className="rounded-xl border border-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50"
+                  className="rounded-xl border border-[#E8E3DC] px-5 py-3 text-sm font-medium text-[#3A3733] transition-colors hover:bg-[#F1EDE7]"
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  disabled={
-                    booking ||
-                    !selectedRequest ||
-                    !selectedDate ||
-                    !selectedSlot
-                  }
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={booking || !selectedRequest || !selectedDate || !selectedSlot}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#B8632E] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#A6572A] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {booking && (
-                    <Loader2
-                      size={17}
-                      className="animate-spin"
-                    />
-                  )}
-
-                  Confirm Appointment
+                  {booking && <Loader2 size={16} className="animate-spin" />}
+                  Confirm appointment
                 </button>
               </div>
             </form>

@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\AdminAppointmentController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\InspectionPhotoController;
 use App\Http\Controllers\Api\ClientDashboardController;
+use App\Http\Controllers\Api\MechanicDashboardController;
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -265,4 +266,9 @@ Route::middleware('auth:sanctum')->group(function () {
         '/client/dashboard',
         [ClientDashboardController::class, 'index']
     );
+
+    Route::get(
+    '/mechanic/dashboard',
+    [MechanicDashboardController::class, 'index']
+);
 });

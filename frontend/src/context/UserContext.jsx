@@ -65,13 +65,15 @@ export default function UserContext({ children }) {
     name,
     email,
     password,
-    password_confirmation
+    password_confirmation,
+    role
   ) => {
     await authService.register(
       name,
       email,
       password,
-      password_confirmation
+      password_confirmation,
+      role
     );
 
     return await getUser();

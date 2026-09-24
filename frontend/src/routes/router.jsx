@@ -43,6 +43,14 @@ import InspectionReports from "../pages/client/InspectionReports";
 
 import Reviews from "../pages/mechanic/Reviews";
 
+import Mechanics from "../pages/admin/Mechanics";
+
+import Clients from "../pages/admin/Clients";
+
+import AdminInspectionRequests from "../pages/admin/InspectionRequests";
+
+import AdminAppointments from "../pages/admin/Appointments";
+
 export const router = createBrowserRouter([
   /*
   |--------------------------------------------------------------------------
@@ -211,6 +219,24 @@ export const router = createBrowserRouter([
           {
             path: "dashboard",
             element: <AdminDashboard />,
+          },
+
+          {
+            path: "mechanics",
+            element: <Mechanics />,
+          },
+
+          {
+            path: "clients",
+            element: <Clients />,
+          },
+          {
+            path: "inspection-requests",
+            element: <AdminInspectionRequests />,
+          },
+          {
+            path: "appointments",
+            element: <AdminAppointments />,
           },
         ],
       },
