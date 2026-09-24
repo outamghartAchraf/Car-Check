@@ -8,10 +8,14 @@ import {
   Loader2,
   MapPin,
   User,
+  Camera,
+  X,
+  Image as ImageIcon,
 } from "lucide-react";
 
 import appointmentService from "../../services/appointmentService";
 import mechanicInspectionReportService from "../../services/mechanicInspectionReportService";
+import inspectionPhotoService from "../../services/inspectionPhotoService";
 
 const inspectionSections = [
   {
@@ -66,8 +70,13 @@ export default function CompleteInspection() {
   const [appointment, setAppointment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+
+  // Selected photos
+  const [photos, setPhotos] = useState([]);
 
   const [form, setForm] = useState({
     engine_status: "good",
@@ -125,6 +134,63 @@ export default function CompleteInspection() {
     }));
   };
 
+  // --------------------------------------------------
+  // Select photos
+  // --------------------------------------------------
+
+  const handlePhotoChange = (event) => {
+    const selectedFiles = Array.from(
+      event.target.files || []
+    );
+
+    if (selectedFiles.length === 0) {
+      return;
+    }
+
+    const validPhotos = selectedFiles.filter((photo) => {
+      const validTypes = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+      ];
+
+      const maxSize = 5 * 1024 * 1024;
+
+      return (
+        validTypes.includes(photo.type) &&
+        photo.size <= maxSize
+      );
+    });
+
+    if (validPhotos.length !== selectedFiles.length) {
+      setError(
+        "Only JPG, PNG and WEBP images up to 5MB are allowed."
+      );
+    }
+
+    setPhotos((previous) => [
+      ...previous,
+      ...validPhotos,
+    ]);
+
+    // Reset input
+    event.target.value = "";
+  };
+
+  // --------------------------------------------------
+  // Remove selected photo
+  // --------------------------------------------------
+
+  const removePhoto = (index) => {
+    setPhotos((previous) =>
+      previous.filter((_, photoIndex) => photoIndex !== index)
+    );
+  };
+
+  // --------------------------------------------------
+  // Submit inspection
+  // --------------------------------------------------
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -133,20 +199,53 @@ export default function CompleteInspection() {
       setError("");
       setSuccess("");
 
-      await mechanicInspectionReportService.create(
-        appointmentId,
-        form
-      );
+      // 1. Create inspection report
+      const response =
+        await mechanicInspectionReportService.create(
+          appointmentId,
+          form
+        );
+
+      // Backend should return:
+      // response.data.inspection_report
+
+     const inspectionReport = response.data.report;
+
+      // Make sure report was created
+      if (!inspectionReport?.id) {
+        throw new Error(
+          "Inspection report was created but its ID was not returned."
+        );
+      }
+
+      // 2. Upload selected photos to the report
+      if (photos.length > 0) {
+        setUploadingPhotos(true);
+
+        for (const photo of photos) {
+          await inspectionPhotoService.uploadForReport(
+            inspectionReport.id,
+            photo
+          );
+        }
+
+        setUploadingPhotos(false);
+      }
 
       setSuccess(
-        "Inspection completed successfully."
+        photos.length > 0
+          ? "Inspection completed and photos uploaded successfully."
+          : "Inspection completed successfully."
       );
 
+      // 3. Redirect
       setTimeout(() => {
         navigate("/mechanic/appointments");
-      }, 1200);
+      }, 1500);
     } catch (err) {
       console.error(err);
+
+      setUploadingPhotos(false);
 
       const validationErrors =
         err.response?.data?.errors;
@@ -163,6 +262,7 @@ export default function CompleteInspection() {
       } else {
         setError(
           err.response?.data?.message ||
+            err.message ||
             "Failed to complete inspection."
         );
       }
@@ -179,6 +279,7 @@ export default function CompleteInspection() {
             size={24}
             className="animate-spin"
           />
+
           <span>Loading appointment...</span>
         </div>
       </div>
@@ -240,6 +341,7 @@ export default function CompleteInspection() {
 
         <div className="grid gap-5 md:grid-cols-3">
 
+          {/* Vehicle */}
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
               <Car size={19} />
@@ -263,6 +365,7 @@ export default function CompleteInspection() {
             </div>
           </div>
 
+          {/* Client */}
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
               <User size={19} />
@@ -283,6 +386,7 @@ export default function CompleteInspection() {
             </div>
           </div>
 
+          {/* Location */}
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
               <MapPin size={19} />
@@ -317,7 +421,6 @@ export default function CompleteInspection() {
         </div>
       )}
 
-      {/* Form */}
       <form
         onSubmit={handleSubmit}
         className="space-y-6"
@@ -343,7 +446,6 @@ export default function CompleteInspection() {
                 key={section.key}
                 className="rounded-2xl border border-slate-200 p-5"
               >
-
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
                   <div>
@@ -353,7 +455,6 @@ export default function CompleteInspection() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-
                     {statusOptions.map((option) => {
                       const field =
                         `${section.key}_status`;
@@ -381,7 +482,6 @@ export default function CompleteInspection() {
                         </button>
                       );
                     })}
-
                   </div>
                 </div>
 
@@ -496,6 +596,116 @@ export default function CompleteInspection() {
           />
         </div>
 
+        {/* ================================================= */}
+        {/* Inspection Photos */}
+        {/* ================================================= */}
+        <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                  <Camera size={20} />
+                </div>
+
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Inspection Photos
+                  </h2>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Add photos showing the vehicle condition.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {photos.length > 0 && (
+              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
+                {photos.length}{" "}
+                {photos.length === 1
+                  ? "photo"
+                  : "photos"}
+              </span>
+            )}
+          </div>
+
+          {/* Upload */}
+          <label className="group flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center transition hover:border-blue-400 hover:bg-blue-50/50">
+
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm">
+              <ImageIcon size={26} />
+            </div>
+
+            <p className="mt-4 text-sm font-semibold text-slate-800">
+              Click to upload inspection photos
+            </p>
+
+            <p className="mt-1 text-xs text-slate-500">
+              JPG, PNG or WEBP • Maximum 5MB per photo
+            </p>
+
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              onChange={handlePhotoChange}
+              className="hidden"
+            />
+          </label>
+
+          {/* Photo Preview */}
+          {photos.length > 0 && (
+            <div className="mt-6">
+
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-slate-800">
+                  Selected Photos
+                </h3>
+
+                <span className="text-xs text-slate-500">
+                  Photos will be attached to the report
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+
+                {photos.map((photo, index) => (
+                  <div
+                    key={`${photo.name}-${index}`}
+                    className="group relative aspect-square overflow-hidden rounded-2xl border border-slate-200 bg-slate-100"
+                  >
+                    <img
+                      src={URL.createObjectURL(photo)}
+                      alt={`Inspection ${index + 1}`}
+                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                    />
+
+                    {/* Remove */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        removePhoto(index)
+                      }
+                      className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition group-hover:opacity-100 hover:bg-red-600"
+                      aria-label="Remove photo"
+                    >
+                      <X size={16} />
+                    </button>
+
+                    {/* Number */}
+                    <div className="absolute bottom-2 left-2 rounded-full bg-black/60 px-2.5 py-1 text-xs font-medium text-white">
+                      Photo {index + 1}
+                    </div>
+                  </div>
+                ))}
+
+              </div>
+            </div>
+          )}
+
+        </div>
+
         {/* Submit */}
         <div className="flex justify-end gap-3">
 
@@ -504,7 +714,8 @@ export default function CompleteInspection() {
             onClick={() =>
               navigate("/mechanic/appointments")
             }
-            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+            disabled={submitting}
+            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
           >
             Cancel
           </button>
@@ -520,7 +731,10 @@ export default function CompleteInspection() {
                   size={18}
                   className="animate-spin"
                 />
-                Completing...
+
+                {uploadingPhotos
+                  ? "Uploading Photos..."
+                  : "Completing..."}
               </>
             ) : (
               <>

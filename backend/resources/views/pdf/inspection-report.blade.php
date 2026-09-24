@@ -447,6 +447,176 @@
 
 </div>
 
+{{-- Client Photos --}}
+@php
+    $clientPhotos = $report->inspectionRequest
+        ->photos()
+        ->whereNull('inspection_report_id')
+        ->get();
+@endphp
+
+@if($clientPhotos->count())
+
+    <div class="section">
+
+        <div class="section-title">
+            Photos Provided by Client
+        </div>
+
+        <table>
+
+            @foreach($clientPhotos->chunk(2) as $photoRow)
+
+                <tr>
+
+                    @foreach($photoRow as $photo)
+
+                        <td
+                            style="
+                                width: 50%;
+                                border: none;
+                                padding: 8px;
+                                text-align: center;
+                                vertical-align: top;
+                            "
+                        >
+
+                            <img
+                                src="{{ public_path('storage/' . $photo->photo_path) }}"
+                                style="
+                                    width: 240px;
+                                    height: 180px;
+                                    object-fit: cover;
+                                    border: 1px solid #e2e8f0;
+                                "
+                            >
+
+                            <div
+                                style="
+                                    margin-top: 6px;
+                                    color: #64748b;
+                                    font-size: 10px;
+                                "
+                            >
+                                Client Photo
+                            </div>
+
+                            @if($photo->description)
+
+                                <div
+                                    style="
+                                        margin-top: 4px;
+                                        font-size: 10px;
+                                        color: #475569;
+                                    "
+                                >
+                                    {{ $photo->description }}
+                                </div>
+
+                            @endif
+
+                        </td>
+
+                    @endforeach
+
+                    @if($photoRow->count() === 1)
+
+                        <td style="border: none;"></td>
+
+                    @endif
+
+                </tr>
+
+            @endforeach
+
+        </table>
+
+    </div>
+
+@endif
+
+
+{{-- Mechanic Report Photos --}}
+@if($report->photos && $report->photos->count())
+
+    <div class="section">
+
+        <div class="section-title">
+            Inspection Photos
+        </div>
+
+        <table>
+
+            @foreach($report->photos->chunk(2) as $photoRow)
+
+                <tr>
+
+                    @foreach($photoRow as $index => $photo)
+
+                        <td
+                            style="
+                                width: 50%;
+                                border: none;
+                                padding: 8px;
+                                text-align: center;
+                                vertical-align: top;
+                            "
+                        >
+
+                            <img
+                                src="{{ public_path('storage/' . $photo->photo_path) }}"
+                                style="
+                                    width: 240px;
+                                    height: 180px;
+                                    object-fit: cover;
+                                    border: 1px solid #e2e8f0;
+                                "
+                            >
+
+                            <div
+                                style="
+                                    margin-top: 6px;
+                                    color: #64748b;
+                                    font-size: 10px;
+                                "
+                            >
+                                Mechanic Inspection Photo
+                            </div>
+
+                            @if($photo->description)
+
+                                <div
+                                    style="
+                                        margin-top: 4px;
+                                        font-size: 10px;
+                                        color: #475569;
+                                    "
+                                >
+                                    {{ $photo->description }}
+                                </div>
+
+                            @endif
+
+                        </td>
+
+                    @endforeach
+
+                    @if($photoRow->count() === 1)
+
+                        <td style="border: none;"></td>
+
+                    @endif
+
+                </tr>
+
+            @endforeach
+
+        </table>
+
+    </div>
+
+@endif
+
 
 {{-- Overall --}}
 <div class="section">
