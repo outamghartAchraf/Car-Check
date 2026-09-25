@@ -323,16 +323,6 @@ Les documents suivants (guide d'installation détaillé, cahier des charges, dia
 
 Le déploiement de l'application est prévu avec Docker, à l'aide de la configuration `docker-compose.yml` déjà présente dans le dépôt. Aucune URL de production n'est disponible à ce jour.
 
-## 📸 Captures d'écran
-
-### Client Dashboard
-À ajouter.
-
-### Mechanic Dashboard
-À ajouter.
-
-### Admin Dashboard
-À ajouter.
 
 ## 👨‍💻 Auteur
 
