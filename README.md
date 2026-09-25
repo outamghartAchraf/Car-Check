@@ -6,6 +6,13 @@
 
 L'application couvre l'ensemble du parcours : création d'une demande d'inspection, prise de rendez-vous selon les disponibilités du mécanicien, réalisation de l'inspection, génération d'un rapport détaillé, puis évaluation du mécanicien par le client. Un espace d'administration permet de superviser la plateforme (mécaniciens, clients, demandes, rendez-vous).
 
+## Diagram use case 
+<img width="559" height="439" alt="digram de use casse" src="https://github.com/user-attachments/assets/a0a58545-037a-4992-a9a2-84900de0d740" />
+## Diagram de class
+<img width="2330" height="1824" alt="Gemini_Generated_Image_jt8etnjt8etnjt8e" src="https://github.com/user-attachments/assets/c8b1a303-2bf8-4e2a-b3e2-630c2667ec55" />
+## Erd
+<img width="1152" height="926" alt="Gemini_Generated_Image_q8paymq8paymq8pa" src="https://github.com/user-attachments/assets/3aaba950-fe2e-4a94-8075-dde218e4120b" />
+
 ## 🎯 Objectifs du projet
 
 - Faciliter la demande d'inspection d'un véhicule d'occasion.
