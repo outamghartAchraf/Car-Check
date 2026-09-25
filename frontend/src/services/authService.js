@@ -8,7 +8,7 @@ const authService = {
   async login(email, password) {
     await this.csrf();
 
-    return api.post("/login", {
+    return api.post("/api/login", {   
       email,
       password,
     });
@@ -23,7 +23,7 @@ const authService = {
   ) {
     await this.csrf();
 
-    return api.post("/register", {
+    return api.post("/api/register", {   
       name,
       email,
       password,
@@ -37,7 +37,7 @@ const authService = {
   },
 
   async logout() {
-    return api.post("/logout");
+    return api.post("/api/logout");   
   },
 };
 
