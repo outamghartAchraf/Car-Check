@@ -277,7 +277,7 @@ export default function InspectionRequests() {
                             >
                               {/* Image */}
                               <img
-                                src={`http://localhost:8000/storage/${photo.photo_path}`}
+                                src={`http://localhost:8080/storage/${photo.photo_path}`}
                                 alt={photo.description || "Vehicle photo"}
                                 className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                               />
@@ -332,7 +332,7 @@ export default function InspectionRequests() {
             onClick={(event) => event.stopPropagation()}
           >
             <img
-              src={`http://localhost:8000/storage/${selectedPhoto.photo_path}`}
+              src={`http://localhost:8080/storage/${selectedPhoto.photo_path}`}
               alt={selectedPhoto.description || "Vehicle photo"}
               className="max-h-[80vh] max-w-full rounded-2xl object-contain shadow-2xl"
             />

@@ -272,3 +272,10 @@ Route::middleware('auth:sanctum')->group(function () {
     [MechanicDashboardController::class, 'index']
 );
 });
+
+Route::middleware([
+    'api',
+    \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+])->group(function () {
+    require __DIR__.'/auth.php';
+});
